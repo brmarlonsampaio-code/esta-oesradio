@@ -1,467 +1,170 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Radio // Global + Brasil</title>
+// ============ API & CARREGAMENTO (CORRIGIDO) ============
+async function fetchStations() {
+  const headers = { 'User-Agent': 'RadioGlobal/1.0' };
+  let globalData = [];
+  let todasBR = [];
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  try {
+    // CORREÇÃO: Adicionar lastcheckok=1 para só trazer estações online
+    const globalResp = await fetch(
+      'https://de1.api.radio-browser.info/json/stations/topclick/200?lastcheckok=1&hidebroken=true', 
+      { headers }
+    );
+    if (globalResp.ok) globalData = await globalResp.json();
+  } catch (e) { console.warn('Erro ao carregar globais:', e); }
 
-  <!-- Leaflet + MarkerCluster CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  try {
+    const brResp = await fetch(
+      'https://de1.api.radio-browser.info/json/stations/bycountry/brazil?lastcheckok=1&hidebroken=true&limit=200', 
+      { headers }
+    );
+    if (brResp.ok) todasBR = await brResp.json();
+  } catch (e) { console.warn('Erro ao carregar BR:', e); }
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      font-size: 14px;
-      line-height: 1.5;
-      color: #111;
-      background: #fff;
-      -webkit-font-smoothing: antialiased;
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-    }
-    button { font-family: inherit; cursor: pointer; }
+  // REMOVIDO: Rádio UESB está offline — substituir por uma funcional
+  const radiosManuais = [
+    // Adicione aqui apenas URLs que você testou e funcionam
+    // {
+    //   stationuuid: "radio-exemplo",
+    //   name: "Rádio Exemplo",
+    //   url_resolved: "https://stream.exemplo.com/radio",
+    //   country: "Brazil",
+    //   state: "São Paulo",
+    //   geo_lat: -23.55,
+    //   geo_long: -46.63
+    // }
+  ];
 
-    #toast-container {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
-    }
-    .toast {
-      pointer-events: auto;
-      padding: 12px 20px;
-      border-radius: 8px;
-      background: #111;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transform: translateX(120%);
-      opacity: 0;
-      transition: transform 300ms ease, opacity 300ms ease;
-      max-width: 320px;
-    }
-    .toast--visible { transform: translateX(0); opacity: 1; }
-    .toast--error { background: #c00; }
-    .toast--success { background: #2d8a4e; }
-
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      background: #fff;
-      border-bottom: 1px solid #eee;
-    }
-    .logo { font-size: 18px; font-weight: 700; color: #111; text-decoration: none; letter-spacing: -0.5px; }
-    .header-right { display: flex; align-items: center; gap: 8px; }
-    .header-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      height: 32px;
-      padding: 0 12px;
-      border: 1px solid #eee;
-      border-radius: 6px;
-      background: #fff;
-      color: #111;
-      font-size: 13px;
-      font-weight: 500;
-      transition: background 150ms ease, border-color 150ms ease;
-    }
-    .header-btn:hover { background: #f5f5f5; border-color: #ccc; }
-    .heart-icon { font-size: 14px; color: #888; }
-    .favorites-count { font-size: 12px; font-weight: 600; min-width: 16px; text-align: center; }
-
-    .main { display: flex; flex: 1; height: calc(100vh - 52px - 72px); overflow: hidden; }
-    .panel { height: 100%; overflow: hidden; }
-    .panel--grid { width: 40%; display: flex; flex-direction: column; border-right: 1px solid #eee; }
-    .panel--map { width: 60%; position: relative; }
-    #map { width: 100%; height: 100%; z-index: 1; }
-
-    .grid-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; flex-shrink: 0; }
-    .grid-title { font-size: 16px; font-weight: 600; margin: 0; color: #111; }
-    .grid-count { font-size: 12px; color: #888; }
-
-    .station-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 12px;
-      padding: 0 20px 20px;
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    .station-card {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 16px;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      background: #fff;
-      cursor: pointer;
-      transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
-      position: relative;
-    }
-    .station-card:hover { border-color: #ccc; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .station-card--active { border-color: #111; box-shadow: 0 0 0 1px #111; }
-    .station-card__name {
-      font-size: 13px;
-      font-weight: 600;
-      color: #111;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; color: #888; flex: 1; }
-
-    .player-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      background: #fff;
-      border-top: 1px solid #eee;
-      gap: 16px;
-    }
-    .player-info { flex: 1; min-width: 0; }
-    .player-station { font-size: 14px; font-weight: 600; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .player-meta { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .player-controls { display: flex; align-items: center; gap: 8px; }
-    .player-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: none;
-      background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      color: #111;
-    }
-    .player-btn:hover { background: #f5f5f5; }
-    .player-btn--large { width: 44px; height: 44px; font-size: 20px; }
-
-    .volume-slider {
-      -webkit-appearance: none;
-      width: 80px;
-      height: 4px;
-      border-radius: 2px;
-      background: #eee;
-    }
-    .volume-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #111;
-    }
-
-    @media (max-width: 768px) {
-      .main { flex-direction: column; height: calc(100vh - 52px - 100px); }
-      .panel--grid { width: 100%; height: 50%; border-right: none; border-bottom: 1px solid #eee; }
-      .panel--map { width: 100%; height: 50%; }
-      .player-bar { height: 100px; flex-wrap: wrap; padding: 12px 16px; }
-    }
-  </style>
-</head>
-
-<body>
-
-  <div id="toast-container"></div>
-
-  <header class="header">
-    <a href="#" class="logo">RADIO //</a>
-    <div class="header-right">
-      <button class="header-btn" id="favorites-toggle">
-        <span class="heart-icon">&#9829;</span>
-        <span class="favorites-count" id="fav-count">0</span>
-      </button>
-    </div>
-  </header>
-
-  <main class="main">
-    <section class="panel panel--grid">
-      <div class="grid-header">
-        <h2 class="grid-title">Emissoras Disponíveis</h2>
-        <span class="grid-count" id="grid-count">0 emissoras</span>
-      </div>
-      <div class="station-grid" id="station-grid"></div>
-      <div class="empty-state" id="empty-state" style="display:none;">
-        <p>Nenhuma emissora carregada.</p>
-      </div>
-    </section>
-
-    <section class="panel panel--map">
-      <div id="map"></div>
-    </section>
-  </main>
-
-  <footer class="player-bar">
-    <div class="player-info">
-      <div class="player-station" id="player-station">Selecione uma emissora</div>
-      <div class="player-meta" id="player-meta">Aguardando reprodução</div>
-    </div>
-    <div class="player-controls">
-      <button class="player-btn" id="btn-prev">&#9198;</button>
-      <button class="player-btn player-btn--large" id="btn-play">&#9654;</button>
-      <button class="player-btn" id="btn-next">&#9197;</button>
-    </div>
-    <div class="player-extras">
-      <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.01" value="0.8" />
-    </div>
-  </footer>
-
-  <!-- CORREÇÃO 1: Remoção do atributo crossorigin="anonymous" -->
-  <audio id="audio-player"></audio>
-
-  <script type="importmap">
-    {
-      "imports": {
-        "leaflet": "https://esm.sh/leaflet@1.9.4",
-        "leaflet.markercluster": "https://esm.sh/leaflet.markercluster@1.5.3"
+  const combinadas = [...globalData, ...todasBR, ...radiosManuais];
+  
+  const unicas = [];
+  const vistas = new Set();
+  
+  for (const s of combinadas) {
+    if (s.stationuuid && !vistas.has(s.stationuuid)) {
+      vistas.add(s.stationuuid);
+      
+      // CORREÇÃO: SEMPRE usar url_resolved (já resolvido pela API)
+      // NUNCA converter HTTP→HTTPS — deixa o navegador tentar
+      let streamUrl = s.url_resolved;
+      
+      // CORREÇÃO: Pular streams HLS (não funcionam em <audio> nativo)
+      if (s.hls === 1 || s.hls === '1') {
+        console.warn(`Pulando estação HLS: ${s.name}`);
+        continue;
       }
-    }
-  </script>
-
-  <script type="module">
-    import L from 'leaflet';
-    import 'leaflet.markercluster';
-
-    // ============ TOAST ============
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      if (type === 'error') toast.classList.add('toast--error');
-      if (type === 'success') toast.classList.add('toast--success');
-      toast.textContent = message;
-      container.appendChild(toast);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => toast.classList.add('toast--visible'));
-      });
-      setTimeout(() => {
-        toast.classList.remove('toast--visible');
-        toast.addEventListener('transitionend', () => toast.remove(), { once: true });
-        setTimeout(() => toast.remove(), 400);
-      }, 3500);
-    }
-
-    // ============ ESTADO & VARIÁVEIS GLOBAL ============
-    let allStations = [];
-    let currentStation = null;
-    let isPlaying = false;
-    let map, markerClusterGroup, markersMap = new Map();
-    const audio = document.getElementById('audio-player');
-
-    // ============ API & CARREGAMENTO ============
-    async function fetchStations() {
-      const headers = { 'User-Agent': 'RadioGlobal/1.0' };
-      let globalData = [];
-      let todasBR = [];
-
-      try {
-        const globalResp = await fetch('https://de1.api.radio-browser.info/json/stations/topclick/200', { headers });
-        if (globalResp.ok) globalData = await globalResp.json();
-      } catch (e) { console.warn('Erro ao carregar globais:', e); }
-
-      try {
-        const brResp = await fetch('https://de1.api.radio-browser.info/json/stations/bycountry/brazil?hidebroken=true&limit=200', { headers });
-        if (brResp.ok) todasBR = await brResp.json();
-      } catch (e) { console.warn('Erro ao carregar BR:', e); }
-
-      // Adicionando rádios manuais
-      const radiosManuais = [
-        {
-          stationuuid: "uesb-975-fm",
-          name: "Rádio UESB 97.5 FM - Vitória da Conquista/BA",
-          url_resolved: "http://200.128.60.2:8000/stream",
-          country: "Brazil",
-          state: "Bahia",
-          geo_lat: -14.865,
-          geo_long: -40.8376
-        }
-      ];
-
-      const combinadas = [...globalData, ...todasBR, ...radiosManuais];
       
-      // Filtragem técnica (Removendo duplicatas e URLs inválidas)
-      const unicas = [];
-      const vistas = new Set();
+      // CORREÇÃO: Pular se não tiver URL válida
+      if (!streamUrl) {
+        console.warn(`Pulando estação sem URL: ${s.name}`);
+        continue;
+      }
       
-      for (const s of combinadas) {
-        if (s.stationuuid && !vistas.has(s.stationuuid)) {
-          vistas.add(s.stationuuid);
-          
-          // CORREÇÃO 2: Trata URLs HTTP para evitar bloqueio Mixed Content se estiver no GitHub Pages (HTTPS)
-          let streamUrl = s.url_resolved || s.url;
-          if (window.location.protocol === 'https:' && streamUrl.startsWith('http://')) {
-            // Tenta forçar HTTPS quando a porta for padrão (mídia protegida)
-            if (!streamUrl.includes(':8000') && !streamUrl.includes(':8080')) {
-              streamUrl = streamUrl.replace('http://', 'https://');
-            }
+      s.url_resolved = streamUrl;
+      unicas.push(s);
+    }
+  }
+
+  return unicas;
+}
+
+// ============ MAPA (CORRIGIDO - Geocodificação fallback) ============
+function updateMapMarkers(stations) {
+  markerClusterGroup.clearLayers();
+  markersMap.clear();
+
+  // Coordenadas aproximadas por estado do Brasil
+  const brStateCoords = {
+    'Acre': [-9.02, -70.81], 'Alagoas': [-9.57, -36.78], 'Amapá': [1.41, -51.77],
+    'Amazonas': [-3.47, -65.10], 'Bahia': [-12.97, -41.70], 'Ceará': [-5.20, -39.53],
+    'Distrito Federal': [-15.80, -47.88], 'Espírito Santo': [-19.18, -40.34],
+    'Goiás': [-15.93, -49.26], 'Maranhão': [-5.42, -45.44], 'Mato Grosso': [-12.64, -55.42],
+    'Mato Grosso do Sul': [-20.51, -54.54], 'Minas Gerais': [-18.10, -44.38],
+    'Pará': [-5.53, -52.29], 'Paraíba': [-7.24, -36.78], 'Paraná': [-24.89, -51.55],
+    'Pernambuco': [-8.38, -37.86], 'Piauí': [-6.60, -42.28], 'Rio de Janeiro': [-22.25, -42.66],
+    'Rio Grande do Norte': [-5.81, -36.59], 'Rio Grande do Sul': [-30.01, -51.22],
+    'Rondônia': [-10.83, -63.34], 'Roraima': [1.89, -61.22], 'Santa Catarina': [-27.33, -50.88],
+    'São Paulo': [-22.55, -48.64], 'Sergipe': [-10.57, -37.45], 'Tocantins': [-10.17, -48.33]
+  };
+
+  // Coordenadas aproximadas por país
+  const countryCoords = {
+    'France': [46.23, 2.21], 'Germany': [51.17, 10.45], 'United Kingdom': [55.38, -3.44],
+    'United States': [37.09, -95.71], 'Italy': [41.87, 12.57], 'Spain': [40.46, -3.75],
+    'Portugal': [39.40, -8.22], 'Netherlands': [52.13, 5.29], 'Belgium': [50.50, 4.47],
+    'Switzerland': [46.82, 8.23], 'Austria': [47.52, 14.55], 'Poland': [51.92, 19.15],
+    'Russia': [61.52, 105.32], 'Japan': [36.20, 138.25], 'China': [35.86, 104.19],
+    'India': [20.59, 78.96], 'Australia': [-25.27, 133.78], 'Canada': [56.13, -106.35],
+    'Brazil': [-14.24, -51.93], 'Mexico': [23.63, -102.55]
+  };
+
+  stations.forEach(s => {
+    let lat = parseFloat(s.geo_lat);
+    let lng = parseFloat(s.geo_long);
+    
+    // CORREÇÃO: Se não tiver coordenadas, tentar inferir do estado/país
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+      const state = (s.state || '').trim();
+      const country = (s.country || '').trim();
+      
+      if (s.countrycode === 'BR' || country === 'Brazil') {
+        // Procurar estado do Brasil
+        for (const [estado, coords] of Object.entries(brStateCoords)) {
+          if (state.toLowerCase().includes(estado.toLowerCase()) || 
+              estado.toLowerCase().includes(state.toLowerCase())) {
+            [lat, lng] = coords;
+            break;
           }
-          
-          s.url_resolved = streamUrl;
-          unicas.push(s);
         }
       }
-
-      return unicas;
-    }
-
-    // ============ MAPA ============
-    function initMap() {
-      map = L.map('map', { center: [-15, -50], zoom: 4 });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
-
-      markerClusterGroup = L.markerClusterGroup({ maxClusterRadius: 60 });
-      map.addLayer(markerClusterGroup);
-    }
-
-    function updateMapMarkers(stations) {
-      markerClusterGroup.clearLayers();
-      markersMap.clear();
-
-      stations.forEach(s => {
-        const lat = parseFloat(s.geo_lat);
-        const lng = parseFloat(s.geo_long);
-        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-          const marker = L.circleMarker([lat, lng], {
-            radius: 6, color: '#111', fillColor: '#111', fillOpacity: 0.7
-          });
-          marker.bindPopup(`<strong>${s.name}</strong><br>${s.country || ''}`);
-          marker.on('click', () => playStation(s));
-          markerClusterGroup.addLayer(marker);
-          markersMap.set(s.stationuuid, marker);
+      
+      // Se ainda não achou, tentar pelo país
+      if (!lat || !lng) {
+        for (const [pais, coords] of Object.entries(countryCoords)) {
+          if (country.toLowerCase().includes(pais.toLowerCase())) {
+            [lat, lng] = coords;
+            break;
+          }
         }
+      }
+    }
+
+    if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+      const marker = L.circleMarker([lat, lng], {
+        radius: 6, color: '#111', fillColor: '#111', fillOpacity: 0.7
       });
+      marker.bindPopup(`<strong>${s.name}</strong><br>${s.country || ''}${s.state ? ' - ' + s.state : ''}`);
+      marker.on('click', () => playStation(s));
+      markerClusterGroup.addLayer(marker);
+      markersMap.set(s.stationuuid, marker);
     }
+  });
+}
 
-    // ============ REPRODUTOR DE ÁUDIO ============
-    function playStation(s) {
-      if (!audio || !s?.url_resolved) return;
+// ============ REPRODUTOR (CORRIGIDO) ============
+function handleAudioError(station, err) {
+  isPlaying = false;
+  document.getElementById('btn-play').textContent = '▶';
+  
+  let message;
+  let isMixedContent = false;
+  
+  // Detectar Mixed Content
+  if (window.location.protocol === 'https:' && station?.url_resolved?.startsWith('http://')) {
+    isMixedContent = true;
+    message = `🔒 ${station.name} — Stream HTTP bloqueado pelo navegador (Mixed Content).`;
+  } else if (err?.name === 'NotSupportedError') {
+    message = `❌ ${station.name} — Formato de áudio não suportado.`;
+  } else {
+    message = `📡 ${station.name} — Stream offline ou inacessível.`;
+  }
+  
+  console.warn('Erro ao reproduzir:', err);
+  showToast(message, 'error');
+}
 
-      if (currentStation?.stationuuid === s.stationuuid) {
-        if (audio.paused) {
-          audio.play().catch(e => handleAudioError(s, e));
-        } else {
-          audio.pause();
-        }
-        return;
-      }
-
-      currentStation = s;
-      document.getElementById('player-station').textContent = s.name;
-      document.getElementById('player-meta').textContent = `${s.country || 'Global'} ${s.state ? ' - ' + s.state : ''}`;
-
-      audio.src = s.url_resolved;
-      audio.load();
-
-      // CORREÇÃO 3: Tratamento de erro com aviso em tela
-      audio.play().then(() => {
-        isPlaying = true;
-        document.getElementById('btn-play').textContent = '❚❚';
-        updateUI();
-      }).catch(err => {
-        handleAudioError(s, err);
-      });
-    }
-
-    function handleAudioError(station, err) {
-      isPlaying = false;
-      document.getElementById('btn-play').textContent = '▶';
-      console.warn('Erro ao reproduzir stream:', err);
-
-      if (window.location.protocol === 'https:' && station.url_resolved.startsWith('http://')) {
-        showToast(`O navegador bloqueou ${station.name} por ser um stream HTTP inseguro.`, 'error');
-      } else {
-        showToast(`Não foi possível conectar a ${station.name}. Stream pode estar offline.`, 'error');
-      }
-    }
-
-    // ============ INTERFACE (GRID) ============
-    function renderGrid(stations) {
-      const grid = document.getElementById('station-grid');
-      const countEl = document.getElementById('grid-count');
-      grid.innerHTML = '';
-      countEl.textContent = `${stations.length} emissoras`;
-
-      stations.forEach(s => {
-        const card = document.createElement('div');
-        card.className = `station-card ${currentStation?.stationuuid === s.stationuuid ? 'station-card--active' : ''}`;
-        card.innerHTML = `<div class="station-card__name">${s.name}</div>`;
-        card.addEventListener('click', () => playStation(s));
-        grid.appendChild(card);
-      });
-    }
-
-    function updateUI() {
-      if (allStations.length) renderGrid(allStations);
-    }
-
-    // ============ CONTROLES DO PLAYER ============
-    document.getElementById('btn-play').addEventListener('click', () => {
-      if (!currentStation && allStations.length) {
-        playStation(allStations[0]);
-        return;
-      }
-      if (audio.paused) {
-        audio.play().catch(e => handleAudioError(currentStation, e));
-        document.getElementById('btn-play').textContent = '❚❚';
-      } else {
-        audio.pause();
-        document.getElementById('btn-play').textContent = '▶';
-      }
-    });
-
-    document.getElementById('volume').addEventListener('input', (e) => {
-      audio.volume = parseFloat(e.target.value);
-    });
-
-    // Eventos nativos da tag <audio>
-    audio.addEventListener('play', () => { document.getElementById('btn-play').textContent = '❚❚'; });
-    audio.addEventListener('pause', () => { document.getElementById('btn-play').textContent = '▶'; });
-    audio.addEventListener('error', () => { handleAudioError(currentStation, 'Erro de reprodução nativa'); });
-
-    // ============ INICIALIZAÇÃO ============
-    window.addEventListener('DOMContentLoaded', async () => {
-      initMap();
-      allStations = await fetchStations();
-      renderGrid(allStations);
-      updateMapMarkers(allStations);
-    });
-  </script>
-</body>
-</html>
+// CORREÇÃO: Evento de erro nativo
+audio.addEventListener('error', (e) => {
+  const error = e.target.error;
+  handleAudioError(currentStation, error || new Error('Erro de reprodução nativa'));
+});
