@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Radio // Global + Brasil</title>
+  <title>Rádios do Brasil</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -31,7 +31,6 @@
       color: #111;
       background: #fff;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
       overflow: hidden;
       height: 100vh;
       width: 100vw;
@@ -131,7 +130,6 @@
     .heart-icon {
       font-size: 14px;
       color: #888;
-      transition: color 150ms ease;
     }
     .header-btn--active .heart-icon {
       color: #fff;
@@ -139,29 +137,6 @@
     .favorites-count {
       font-size: 12px;
       font-weight: 600;
-      min-width: 16px;
-      text-align: center;
-    }
-    .kbd-hint {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      margin-left: 4px;
-    }
-    kbd {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 20px;
-      height: 20px;
-      padding: 0 4px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background: #f9f9f9;
-      font-size: 11px;
-      font-family: inherit;
-      color: #666;
-      line-height: 1;
     }
 
     .main {
@@ -282,15 +257,11 @@
       justify-content: center;
       font-size: 12px;
       opacity: 0;
-      transition: opacity 150ms ease, background 150ms ease, border-color 150ms ease;
+      transition: opacity 150ms ease;
       color: #111;
     }
     .station-card:hover .station-card__play {
       opacity: 1;
-    }
-    .station-card__play:hover {
-      background: #f5f5f5;
-      border-color: #ccc;
     }
     .station-card--active .station-card__play {
       opacity: 1;
@@ -322,7 +293,6 @@
       color: #111;
       font-size: 13px;
       font-weight: 500;
-      transition: background 150ms ease, border-color 150ms ease;
     }
     .btn-clear:hover {
       background: #f5f5f5;
@@ -437,49 +407,6 @@
       cursor: pointer;
       border: none;
     }
-    .volume-slider::-moz-range-thumb {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #111;
-      cursor: pointer;
-      border: none;
-    }
-
-    .sleep-dropdown {
-      position: relative;
-    }
-    .sleep-menu {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      right: 0;
-      display: none;
-      flex-direction: column;
-      min-width: 100px;
-      background: #fff;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 4px;
-      z-index: 200;
-    }
-    .sleep-menu--open {
-      display: flex;
-    }
-    .sleep-menu button {
-      padding: 8px 12px;
-      border: none;
-      background: transparent;
-      border-radius: 4px;
-      font-size: 13px;
-      color: #111;
-      text-align: left;
-      transition: background 150ms ease;
-      font-family: inherit;
-    }
-    .sleep-menu button:hover {
-      background: #f5f5f5;
-    }
 
     .search-modal {
       position: fixed;
@@ -515,10 +442,6 @@
       font-family: inherit;
       color: #111;
       outline: none;
-      background: #fff;
-    }
-    .search-input::placeholder {
-      color: #888;
     }
     .search-results {
       max-height: 360px;
@@ -532,7 +455,6 @@
       padding: 10px 12px;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 150ms ease;
     }
     .search-result-item:hover {
       background: #f5f5f5;
@@ -545,11 +467,6 @@
       border-top: 1px solid #eee;
       font-size: 12px;
       color: #888;
-    }
-    .search-footer span {
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
     .filter-sidebar {
@@ -588,13 +505,9 @@
       border-radius: 6px;
       border: none;
       background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       font-size: 14px;
       color: #666;
-      transition: background 150ms ease;
-      padding: 0;
+      cursor: pointer;
     }
     .close-btn:hover {
       background: #f5f5f5;
@@ -613,7 +526,6 @@
       font-weight: 600;
       color: #111;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
     .filter-item {
       display: flex;
@@ -622,13 +534,12 @@
       padding: 8px 10px;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 150ms ease;
       font-size: 13px;
     }
     .filter-item:hover {
       background: #f5f5f5;
     }
-    .filter-item input[type="checkbox"] {
+    .filter-item input {
       margin-right: 8px;
     }
     .filter-count {
@@ -639,42 +550,14 @@
     .leaflet-container {
       font-family: 'Inter', system-ui, sans-serif;
     }
-    .marker-cluster-small,
-    .marker-cluster-medium,
-    .marker-cluster-large {
-      background-color: rgba(17, 17, 17, 0.15);
-    }
-    .marker-cluster-small div,
-    .marker-cluster-medium div,
-    .marker-cluster-large div {
-      background-color: #111;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: inherit;
-    }
-    .leaflet-popup-content-wrapper {
-      border-radius: 8px;
-      padding: 0;
-      overflow: hidden;
-    }
-    .leaflet-popup-content {
-      margin: 0;
-      padding: 12px 16px;
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 13px;
-    }
 
     @media (max-width: 768px) {
       .main {
         flex-direction: column;
-        height: calc(100vh - 52px - 100px);
       }
       .panel--grid {
         width: 100%;
         height: 50%;
-        border-right: none;
-        border-bottom: 1px solid #eee;
       }
       .panel--map {
         width: 100%;
@@ -683,51 +566,17 @@
       .station-grid {
         grid-template-columns: repeat(2, 1fr);
       }
-      .player-bar {
-        height: 100px;
-        flex-wrap: wrap;
-        padding: 12px 16px;
-        gap: 8px;
-      }
-      .player-info {
-        width: 100%;
-        flex: none;
-      }
       .filter-sidebar {
         width: 100%;
-      }
-      .kbd-hint {
-        display: none;
       }
     }
 
     ::-webkit-scrollbar {
       width: 6px;
     }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
     ::-webkit-scrollbar-thumb {
       background: #ddd;
       border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #bbb;
-    }
-
-    .retry-btn {
-      padding: 8px 16px;
-      border: 1px solid #111;
-      border-radius: 6px;
-      background: #111;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 500;
-      transition: opacity 150ms ease;
-      cursor: pointer;
-    }
-    .retry-btn:hover {
-      opacity: 0.85;
     }
   </style>
 </head>
@@ -738,7 +587,7 @@
 
   <header class="header">
     <div class="header-left">
-      <a href="/" class="logo">RADIO //</a>
+      <a href="/" class="logo">RÁDIOS DO BRASIL 🇧🇷</a>
     </div>
     <div class="header-right">
       <button class="header-btn" id="favorites-toggle">
@@ -746,31 +595,30 @@
         <span class="favorites-count" id="fav-count">0</span>
       </button>
       <button class="header-btn" id="filters-toggle">Filtros</button>
-      <span class="kbd-hint"><kbd>&#8984;</kbd><kbd>K</kbd></span>
     </div>
   </header>
 
   <main class="main">
-    <section class="panel panel--grid" id="grid-panel">
+    <section class="panel panel--grid">
       <div class="grid-header">
         <h2 class="grid-title" id="grid-title">Todas as emissoras</h2>
         <span class="grid-count" id="grid-count">0 emissoras</span>
       </div>
       <div class="station-grid" id="station-grid"></div>
       <div class="empty-state" id="empty-state" style="display:none;">
-        <p>Nenhuma emissora corresponde aos filtros.</p>
+        <p>Nenhuma emissora encontrada.</p>
         <button class="btn-clear" id="clear-filters">Limpar filtros</button>
       </div>
     </section>
 
-    <section class="panel panel--map" id="map-panel">
+    <section class="panel panel--map">
       <div id="map"></div>
     </section>
   </main>
 
-  <footer class="player-bar" id="player-bar">
+  <footer class="player-bar">
     <div class="player-info">
-      <div class="player-station" id="player-station">Selecione uma emissora</div>
+      <div class="player-station" id="player-station">Selecione uma rádio</div>
       <div class="player-meta" id="player-meta"></div>
     </div>
     <div class="player-controls">
@@ -781,28 +629,18 @@
     <div class="player-extras">
       <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.01" value="0.8" />
       <button class="player-btn" id="btn-favorite">&#9829;</button>
-      <div class="sleep-dropdown">
-        <button class="player-btn" id="btn-sleep">&#128164;</button>
-        <div class="sleep-menu" id="sleep-menu">
-          <button data-min="15">15 min</button>
-          <button data-min="30">30 min</button>
-          <button data-min="60">60 min</button>
-          <button data-min="90">90 min</button>
-          <button data-min="0">Off</button>
-        </div>
-      </div>
     </div>
   </footer>
 
   <div class="search-modal" id="search-modal" style="display:none;">
     <div class="search-backdrop"></div>
     <div class="search-container">
-      <input type="text" class="search-input" id="search-input" placeholder="Buscar emissoras, países, tags..." />
+      <input type="text" class="search-input" id="search-input" placeholder="Buscar rádios, estados, cidades..." />
       <div class="search-results" id="search-results"></div>
       <div class="search-footer">
-        <span><kbd>&#8593;</kbd><kbd>&#8595;</kbd> Navegar</span>
-        <span><kbd>&#8629;</kbd> Tocar</span>
-        <span><kbd>Esc</kbd> Fechar</span>
+        <span>&#8593;&#8595; Navegar</span>
+        <span>&#8629; Tocar</span>
+        <span>Esc Fechar</span>
       </div>
     </div>
   </div>
@@ -812,18 +650,14 @@
       <h3>Filtros</h3>
       <button class="close-btn" id="close-filters">&#10005;</button>
     </div>
-    <div class="filter-body" id="filter-body">
+    <div class="filter-body">
       <div class="filter-section">
-        <h4>País</h4>
-        <div class="filter-list" id="filter-countries"></div>
+        <h4>Estado</h4>
+        <div id="filter-states"></div>
       </div>
       <div class="filter-section">
         <h4>Tags</h4>
-        <div class="filter-list" id="filter-tags"></div>
-      </div>
-      <div class="filter-section">
-        <h4>Bitrate</h4>
-        <div class="filter-list" id="filter-bitrates"></div>
+        <div id="filter-tags"></div>
       </div>
     </div>
   </aside>
@@ -844,98 +678,47 @@
     import 'leaflet.markercluster';
 
     // ============ TOAST ============
-    function showToast(message, type = 'info') {
+    function showToast(msg, type = 'info') {
       const container = document.getElementById('toast-container');
-      if (!container) return;
       const toast = document.createElement('div');
       toast.className = 'toast';
       if (type === 'error') toast.classList.add('toast--error');
       if (type === 'success') toast.classList.add('toast--success');
-      toast.textContent = message;
+      toast.textContent = msg;
       container.appendChild(toast);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => toast.classList.add('toast--visible'));
-      });
+      requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('toast--visible')));
       setTimeout(() => {
         toast.classList.remove('toast--visible');
-        toast.addEventListener('transitionend', () => toast.remove(), { once: true });
         setTimeout(() => toast.remove(), 400);
       }, 3000);
     }
 
     // ============ STORAGE ============
     const FAV_KEY = 'radio.favorites';
-    const LAST_KEY = 'radio.lastPlayed';
-
     function getFavorites() {
       try {
         const raw = localStorage.getItem(FAV_KEY);
-        if (!raw) return new Set();
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? new Set(parsed) : new Set();
+        return raw ? new Set(JSON.parse(raw)) : new Set();
       } catch { return new Set(); }
     }
     function saveFavorites(favs) {
-      localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(favs)));
+      localStorage.setItem(FAV_KEY, JSON.stringify([...favs]));
     }
     function toggleFavorite(uuid) {
       const favs = getFavorites();
-      if (favs.has(uuid)) { favs.delete(uuid); saveFavorites(favs); return false; }
-      else { favs.add(uuid); saveFavorites(favs); return true; }
+      favs.has(uuid) ? favs.delete(uuid) : favs.add(uuid);
+      saveFavorites(favs);
+      return favs.has(uuid);
     }
     function isFavorite(uuid) { return getFavorites().has(uuid); }
-    function getLastPlayed() {
-      try { return JSON.parse(localStorage.getItem(LAST_KEY)); } catch { return null; }
-    }
-    function setLastPlayed(station) {
-      try { localStorage.setItem(LAST_KEY, JSON.stringify(station)); } catch {}
-    }
 
-    // ============ API - COM RÁDIOS MANUAIS ============
-    async function fetchStations() {
-      const headers = { 'User-Agent': 'RadioGlobal/1.0' };
-      
-      // 1. Globais (top 500)
-      console.log('🔄 Carregando rádios globais...');
-      const globalResp = await fetch('https://de1.api.radio-browser.info/json/stations/topclick/500', { headers });
-      if (!globalResp.ok) throw new Error(`HTTP ${globalResp.status}: Globais`);
-      const globalData = await globalResp.json();
-      console.log(`✅ Globais: ${globalData.length}`);
-      
-      // 2. Brasileiras
-      console.log('🔄 Carregando rádios brasileiras...');
-      let todasBR = [];
-      
-      try {
-        const resp = await fetch('https://de1.api.radio-browser.info/json/stations/bycountry/brazil?hidebroken=true&limit=500', { headers });
-        if (resp.ok) {
-          const data = await resp.json();
-          if (Array.isArray(data)) {
-            todasBR = [...todasBR, ...data];
-            console.log(`✅ bycountry/brazil: ${data.length}`);
-          }
-        }
-      } catch(e) { console.warn('Erro bycountry:', e); }
-      
-      // Busca por estados
-      const estados = ['bahia', 'sao-paulo', 'rio-de-janeiro', 'minas-gerais', 'parana', 'rio-grande-do-sul', 'pernambuco', 'ceara', 'para', 'santa-catarina', 'goias', 'maranhao', 'amazonas', 'paraiba', 'espirito-santo', 'rio-grande-do-norte', 'alagoas', 'piaui', 'distrito-federal', 'mato-grosso', 'mato-grosso-do-sul', 'sergipe', 'rondonia', 'tocantins', 'acre', 'amapa', 'roraima'];
-      
-      for (const estado of estados) {
-        try {
-          const resp = await fetch(`https://de1.api.radio-browser.info/json/stations/bystate/${estado}/brazil?hidebroken=true&limit=100`, { headers });
-          if (resp.ok) {
-            const data = await resp.json();
-            if (Array.isArray(data) && data.length > 0) {
-              todasBR = [...todasBR, ...data];
-              console.log(`✅ ${estado}: ${data.length}`);
-            }
-          }
-          await new Promise(r => setTimeout(r, 100));
-        } catch(e) {}
-      }
+    // ============ API - SOMENTE BRASIL ============
+    async function fetchBrazilianStations() {
+      const headers = { 'User-Agent': 'RadioBrasil/1.0' };
+      let todas = [];
 
-      // ============ RÁDIOS ADICIONADAS MANUALMENTE ============
-      const radiosManuais = [
+      // Rádios adicionadas manualmente
+      const manuais = [
         {
           stationuuid: "uesb-975-fm",
           name: "Rádio UESB 97.5 FM - Vitória da Conquista/BA",
@@ -943,80 +726,86 @@
           country: "Brazil",
           countrycode: "BR",
           state: "Bahia",
-          language: "portuguese",
-          tags: "universitaria,universidade,educativa,uesb,bahia,vitoria da conquista",
+          tags: "universitaria,universidade,educativa,uesb,bahia",
           geo_lat: -14.865,
           geo_long: -40.8376,
           bitrate: 128,
-          codec: "MP3",
-          homepage: "http://www.uesb.br/radio"
+          codec: "MP3"
         }
       ];
-      
-      todasBR = [...todasBR, ...radiosManuais];
-      console.log(`✅ Rádios manuais adicionadas: ${radiosManuais.length}`);
-      
-      console.log(`✅ Total BR antes de deduplicar: ${todasBR.length}`);
-      
+      todas = [...manuais];
+      console.log('✅ Manuais:', manuais.length);
+
+      // Busca por país (limite máximo)
+      try {
+        const resp = await fetch('https://de1.api.radio-browser.info/json/stations/bycountry/brazil?hidebroken=true&limit=1000', { headers });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (Array.isArray(data)) {
+            todas = [...todas, ...data];
+            console.log('✅ bycountry:', data.length);
+          }
+        }
+      } catch(e) { console.warn('Erro bycountry:', e); }
+
+      // Busca por estados
+      const estados = [
+        'sao-paulo', 'rio-de-janeiro', 'minas-gerais', 'bahia', 'parana',
+        'rio-grande-do-sul', 'pernambuco', 'ceara', 'para', 'santa-catarina',
+        'goias', 'maranhao', 'amazonas', 'paraiba', 'espirito-santo',
+        'rio-grande-do-norte', 'alagoas', 'piaui', 'distrito-federal',
+        'mato-grosso', 'mato-grosso-do-sul', 'sergipe', 'rondonia',
+        'tocantins', 'acre', 'amapa', 'roraima'
+      ];
+
+      for (const estado of estados) {
+        try {
+          const resp = await fetch(`https://de1.api.radio-browser.info/json/stations/bystate/${estado}/brazil?hidebroken=true&limit=200`, { headers });
+          if (resp.ok) {
+            const data = await resp.json();
+            if (Array.isArray(data) && data.length > 0) {
+              todas = [...todas, ...data];
+              console.log(`✅ ${estado}: ${data.length}`);
+            }
+          }
+          await new Promise(r => setTimeout(r, 80));
+        } catch(e) {}
+      }
+
       // Remove duplicatas
-      const brUnicas = [];
-      const brVistas = new Set();
-      for (const s of todasBR) {
-        if (s.stationuuid && !brVistas.has(s.stationuuid)) {
-          brVistas.add(s.stationuuid);
-          brUnicas.push(s);
-        }
-      }
-      console.log(`✅ Brasileiras únicas: ${brUnicas.length}`);
-      
-      // Junta globais + brasileiras
-      const todas = [...globalData, ...brUnicas];
-      const todasUnicas = [];
-      const todasVistas = new Set();
+      const unicas = [];
+      const visto = new Set();
       for (const s of todas) {
-        if (s.stationuuid && !todasVistas.has(s.stationuuid)) {
-          todasVistas.add(s.stationuuid);
-          todasUnicas.push(s);
+        if (s.stationuuid && !visto.has(s.stationuuid)) {
+          visto.add(s.stationuuid);
+          unicas.push(s);
         }
       }
-      
-      // Filtro técnico
-      const filtradas = todasUnicas.filter(s => {
+      console.log('✅ Únicas:', unicas.length);
+
+      // Filtro: só streams funcionais
+      const validas = unicas.filter(s => {
         const url = s.url_resolved || '';
-        return (url.startsWith('http://') || url.startsWith('https://')) &&
-               s.name && s.name.trim().length > 0;
+        return (url.startsWith('http://') || url.startsWith('https://')) && s.name?.trim();
       });
-      
-      console.log(`🎉 Total final: ${filtradas.length} (${globalData.length} globais + ${brUnicas.length} BR)`);
-      return { stations: filtradas, brCount: brUnicas.length, globalCount: globalData.length };
+
+      console.log('🎉 Final:', validas.length);
+      return validas;
     }
 
     // ============ FILTROS ============
-    function filterStations(stations, filters) {
-      const { query = '', countries = [], tags = [], bitrates = [], favoritesOnly = false, favoriteUuids = new Set() } = filters;
+    function filterStations(stations, { query = '', states = [], tags = [], favoritesOnly = false, favoriteUuids = new Set() }) {
       const q = query.toLowerCase().trim();
       return stations.filter(s => {
         if (favoritesOnly && !favoriteUuids.has(s.stationuuid)) return false;
-        if (countries.length > 0 && !countries.includes(s.country || 'Unknown')) return false;
+        if (states.length > 0 && !states.includes(s.state || '')) return false;
         if (tags.length > 0) {
           const sTags = (s.tags || '').toLowerCase().split(',').map(t => t.trim()).filter(Boolean);
           if (!tags.some(t => sTags.includes(t.toLowerCase()))) return false;
         }
-        if (bitrates.length > 0) {
-          const br = parseInt(s.bitrate, 10) || 0;
-          const match = bitrates.some(b => {
-            if (b === '0-64 kbps') return br <= 64;
-            if (b === '64-128 kbps') return br > 64 && br <= 128;
-            if (b === '128-192 kbps') return br > 128 && br <= 192;
-            if (b === '192-320 kbps') return br > 192 && br <= 320;
-            if (b === '320+ kbps') return br > 320;
-            return false;
-          });
-          if (!match) return false;
-        }
         if (q) {
           return (s.name || '').toLowerCase().includes(q) ||
-                 (s.country || '').toLowerCase().includes(q) ||
+                 (s.state || '').toLowerCase().includes(q) ||
                  (s.tags || '').toLowerCase().includes(q);
         }
         return true;
@@ -1028,18 +817,12 @@
 
     function initMap(id, stations, cb) {
       onStationClickCb = cb;
-      map = L.map(id, { center: [-15, -50], zoom: 4, zoomControl: true });
+      map = L.map(id, { center: [-14, -52], zoom: 4, zoomControl: true });
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
-        subdomains: 'abcd',
+        attribution: '&copy; OpenStreetMap',
         maxZoom: 19
       }).addTo(map);
-      markerClusterGroup = L.markerClusterGroup({
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
-        maxClusterRadius: 60
-      });
+      markerClusterGroup = L.markerClusterGroup({ maxClusterRadius: 60 });
       map.addLayer(markerClusterGroup);
       updateMapMarkers(stations);
     }
@@ -1051,10 +834,8 @@
       for (const s of stations) {
         const lat = parseFloat(s.geo_lat), lng = parseFloat(s.geo_long);
         if (!lat || !lng || isNaN(lat) || isNaN(lng)) continue;
-        const marker = L.circleMarker([lat, lng], {
-          radius: 6, color: '#111', weight: 1.5, fillColor: '#111', fillOpacity: 0.7
-        });
-        marker.bindPopup(`<strong>${escHtml(s.name)}</strong><br>${escHtml(s.country || '')}${s.state ? ' - ' + s.state : ''}`);
+        const marker = L.circleMarker([lat, lng], { radius: 6, color: '#009c3b', weight: 2, fillColor: '#009c3b', fillOpacity: 0.7 });
+        marker.bindPopup(`<strong>${escHtml(s.name)}</strong><br>${s.state || ''}`);
         marker.on('click', () => onStationClickCb?.(s));
         markerClusterGroup.addLayer(marker);
         markersMap.set(s.stationuuid, marker);
@@ -1063,48 +844,36 @@
 
     function highlightMapMarker(uuid) {
       const m = markersMap.get(uuid);
-      if (m && map) { map.panTo(m.getLatLng(), { animate: true, duration: 0.5 }); m.openPopup(); }
+      if (m && map) { map.panTo(m.getLatLng(), { animate: true }); m.openPopup(); }
     }
 
     function escHtml(t) {
-      if (!t) return '';
       const d = document.createElement('div');
-      d.textContent = t;
+      d.textContent = t || '';
       return d.innerHTML;
     }
 
     // ============ PLAYER ============
-    let audio, currentStation, isPlaying = false, onErrCb, onEndCb;
+    let audio, currentStation, isPlaying = false;
 
-    function initPlayer(errCb, endCb) {
-      audio = document.getElementById('audio-player');
-      if (!audio) return;
-      onErrCb = errCb; onEndCb = endCb;
-      audio.addEventListener('error', () => { isPlaying = false; onErrCb?.(); });
-      audio.addEventListener('ended', () => { isPlaying = false; onEndCb?.(); });
-      audio.addEventListener('playing', () => { isPlaying = true; });
-      audio.addEventListener('pause', () => { isPlaying = false; });
-    }
+    audio = document.getElementById('audio-player');
+    audio.addEventListener('error', () => { isPlaying = false; updatePlayBtn(); showToast('Erro ao tocar rádio', 'error'); });
+    audio.addEventListener('playing', () => { isPlaying = true; updatePlayBtn(); });
+    audio.addEventListener('pause', () => { isPlaying = false; updatePlayBtn(); });
 
     function playStation(s) {
       if (!audio || !s?.url_resolved) return;
       if (currentStation?.stationuuid === s.stationuuid) {
-        if (audio.paused) audio.play().catch(() => { isPlaying = false; onErrCb?.(); });
+        audio.paused ? audio.play() : audio.pause();
         return;
       }
       currentStation = s;
       audio.src = s.url_resolved;
       audio.load();
-      audio.play().catch(() => { isPlaying = false; onErrCb?.(); });
-      isPlaying = true;
+      audio.play().catch(() => showToast('Stream indisponível', 'error'));
     }
 
-    function togglePlay() {
-      if (!audio) return;
-      if (audio.paused) { audio.play().catch(() => { isPlaying = false; }); isPlaying = true; }
-      else { audio.pause(); isPlaying = false; }
-    }
-    function pause() { audio?.pause(); isPlaying = false; }
+    function togglePlay() { audio?.paused ? audio.play() : audio?.pause(); }
     function setVolume(v) { if (audio) audio.volume = Math.max(0, Math.min(1, parseFloat(v) || 0.8)); }
     function getCurrentStation() { return currentStation; }
     function isPlayingNow() { return isPlaying; }
@@ -1121,43 +890,13 @@
     }
 
     // ============ SEARCH ============
-    let searchModal, searchInput, searchResults, allForSearch = [], filteredSearch = [], searchIdx = -1, onSearchSelect;
+    let searchModal, searchInput, searchResults, allForSearch = [], filteredSearch = [], searchIdx = -1;
 
-    function initSearch(stations, onSelect) {
-      searchModal = document.getElementById('search-modal');
-      searchInput = document.getElementById('search-input');
-      searchResults = document.getElementById('search-results');
-      if (!searchModal) return;
-      onSearchSelect = onSelect;
-      allForSearch = stations;
-      
-      searchInput.addEventListener('input', () => {
-        const q = searchInput.value.trim().toLowerCase();
-        filteredSearch = !q ? allForSearch.slice(0, 50) : allForSearch.filter(s =>
-          (s.name || '').toLowerCase().includes(q) || (s.country || '').toLowerCase().includes(q) || (s.tags || '').toLowerCase().includes(q)
-        ).slice(0, 50);
-        searchIdx = -1;
-        renderSearchResults();
-      });
-      
-      searchInput.addEventListener('keydown', e => {
-        if (!filteredSearch.length) return;
-        if (e.key === 'ArrowDown') { e.preventDefault(); searchIdx = Math.min(searchIdx + 1, filteredSearch.length - 1); renderSearchResults(); }
-        else if (e.key === 'ArrowUp') { e.preventDefault(); searchIdx = Math.max(searchIdx - 1, 0); renderSearchResults(); }
-        else if (e.key === 'Enter') { e.preventDefault(); if (searchIdx >= 0) selectSearch(searchIdx); }
-        else if (e.key === 'Escape') closeSearch();
-      });
-      
-      searchResults.addEventListener('click', e => {
-        const item = e.target.closest('.search-result-item');
-        if (item) selectSearch(parseInt(item.dataset.index));
-      });
-      
-      document.querySelector('.search-backdrop')?.addEventListener('click', closeSearch);
-    }
+    searchModal = document.getElementById('search-modal');
+    searchInput = document.getElementById('search-input');
+    searchResults = document.getElementById('search-results');
 
     function openSearch() {
-      if (!searchModal) return;
       searchModal.style.display = 'flex';
       searchInput.value = '';
       searchInput.focus();
@@ -1165,276 +904,233 @@
       filteredSearch = allForSearch.slice(0, 50);
       renderSearchResults();
     }
+    function closeSearch() { searchModal.style.display = 'none'; }
 
-    function closeSearch() { if (searchModal) searchModal.style.display = 'none'; }
-    function updateSearchStations(stations) { allForSearch = stations; }
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase().trim();
+      filteredSearch = q ? allForSearch.filter(s =>
+        (s.name || '').toLowerCase().includes(q) ||
+        (s.state || '').toLowerCase().includes(q) ||
+        (s.tags || '').toLowerCase().includes(q)
+      ).slice(0, 50) : allForSearch.slice(0, 50);
+      searchIdx = -1;
+      renderSearchResults();
+    });
+
+    searchInput.addEventListener('keydown', e => {
+      if (!filteredSearch.length) return;
+      if (e.key === 'ArrowDown') { searchIdx = Math.min(searchIdx + 1, filteredSearch.length - 1); renderSearchResults(); }
+      else if (e.key === 'ArrowUp') { searchIdx = Math.max(searchIdx - 1, 0); renderSearchResults(); }
+      else if (e.key === 'Enter' && searchIdx >= 0) { onStationClick(filteredSearch[searchIdx]); closeSearch(); }
+      else if (e.key === 'Escape') closeSearch();
+    });
 
     function renderSearchResults() {
-      if (!searchResults) return;
       searchResults.innerHTML = '';
       filteredSearch.forEach((s, i) => {
         const div = document.createElement('div');
         div.className = 'search-result-item';
-        div.dataset.index = i;
-        if (i === searchIdx) div.style.background = '#f5f5f5';
-        const flag = getFlagEmoji(s.countrycode);
-        div.innerHTML = `<span style="font-size:20px">${flag}</span><div><div style="font-weight:600">${escHtml(s.name || 'Unknown')}</div><div style="font-size:12px;color:#888">${s.country || ''} ${s.tags ? '· ' + s.tags.split(',').slice(0,3).join(', ') : ''}</div></div>`;
+        div.style.background = i === searchIdx ? '#f5f5f5' : '';
+        div.innerHTML = `<span style="font-size:18px">🇧🇷</span><div><div style="font-weight:600">${escHtml(s.name)}</div><div style="font-size:12px;color:#888">${s.state || ''} · ${(s.tags || '').split(',').slice(0,3).join(', ')}</div></div>`;
+        div.addEventListener('click', () => { onStationClick(s); closeSearch(); });
         searchResults.appendChild(div);
       });
     }
 
-    function selectSearch(i) {
-      if (i >= 0 && i < filteredSearch.length) onSearchSelect?.(filteredSearch[i]);
-      closeSearch();
-    }
-
-    function getFlagEmoji(cc) {
-      if (!cc || cc.length !== 2) return '';
-      const c = cc.toUpperCase();
-      return String.fromCodePoint(c.charCodeAt(0) + 0x1F1A6, c.charCodeAt(1) + 0x1F1A6);
-    }
+    document.querySelector('.search-backdrop').addEventListener('click', closeSearch);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
 
     // ============ FILTER UI ============
-    let filterOnChange, activeCountries = new Set(), activeTags = new Set(), activeBitrates = new Set();
-    let filterSidebar, filterCountries, filterTags, filterBitrates;
-
-    function initFilters(stations, onChange) {
-      filterSidebar = document.getElementById('filter-sidebar');
-      filterCountries = document.getElementById('filter-countries');
-      filterTags = document.getElementById('filter-tags');
-      filterBitrates = document.getElementById('filter-bitrates');
-      if (!filterSidebar) return;
-      filterOnChange = onChange;
-      renderFilterOptions(stations);
-    }
-
-    function openFilters() { filterSidebar?.classList.add('filter-sidebar--open'); }
-    function closeFilters() { filterSidebar?.classList.remove('filter-sidebar--open'); }
+    let activeStates = new Set(), activeTags = new Set();
 
     function getActiveFilters() {
-      return {
-        countries: Array.from(activeCountries),
-        tags: Array.from(activeTags),
-        bitrates: Array.from(activeBitrates)
-      };
+      return { states: [...activeStates], tags: [...activeTags] };
     }
 
     function renderFilterOptions(stations) {
-      const countryCounts = {}, tagCounts = {}, bitrateCounts = {'0-64 kbps':0,'64-128 kbps':0,'128-192 kbps':0,'192-320 kbps':0,'320+ kbps':0};
+      const stateCounts = {}, tagCounts = {};
       for (const s of stations) {
-        const c = s.country || 'Unknown';
-        countryCounts[c] = (countryCounts[c] || 0) + 1;
+        if (s.state) stateCounts[s.state] = (stateCounts[s.state] || 0) + 1;
         if (s.tags) s.tags.split(',').map(t => t.trim()).filter(Boolean).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
-        const br = parseInt(s.bitrate, 10) || 0;
-        if (br <= 64) bitrateCounts['0-64 kbps']++;
-        else if (br <= 128) bitrateCounts['64-128 kbps']++;
-        else if (br <= 192) bitrateCounts['128-192 kbps']++;
-        else if (br <= 320) bitrateCounts['192-320 kbps']++;
-        else bitrateCounts['320+ kbps']++;
       }
-      if (filterCountries) renderCheckboxes(filterCountries, countryCounts, 'country', activeCountries);
-      if (filterTags) renderCheckboxes(filterTags, tagCounts, 'tag', activeTags);
-      if (filterBitrates) renderCheckboxes(filterBitrates, bitrateCounts, 'bitrate', activeBitrates);
-    }
-
-    function renderCheckboxes(container, counts, name, activeSet) {
-      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 30);
-      container.innerHTML = '';
-      entries.forEach(([label, count]) => {
-        const item = document.createElement('label');
-        item.className = 'filter-item';
-        item.innerHTML = `<input type="checkbox" value="${escHtml(label)}" name="${name}" ${activeSet.has(label)?'checked':''}> <span>${escHtml(label)}</span> <span class="filter-count">(${count})</span>`;
-        item.querySelector('input').addEventListener('change', e => {
-          if (e.target.checked) activeSet.add(label); else activeSet.delete(label);
-          filterOnChange?.(getActiveFilters());
+      
+      const statesDiv = document.getElementById('filter-states');
+      statesDiv.innerHTML = '';
+      Object.entries(stateCounts).sort((a,b) => b[1]-a[1]).forEach(([state, count]) => {
+        const label = document.createElement('label');
+        label.className = 'filter-item';
+        label.innerHTML = `<input type="checkbox" value="${state}" ${activeStates.has(state)?'checked':''}> ${state} <span class="filter-count">(${count})</span>`;
+        label.querySelector('input').addEventListener('change', function() {
+          this.checked ? activeStates.add(state) : activeStates.delete(state);
+          onFiltersChange();
         });
-        container.appendChild(item);
+        statesDiv.appendChild(label);
+      });
+
+      const tagsDiv = document.getElementById('filter-tags');
+      tagsDiv.innerHTML = '';
+      Object.entries(tagCounts).sort((a,b) => b[1]-a[1]).slice(0, 50).forEach(([tag, count]) => {
+        const label = document.createElement('label');
+        label.className = 'filter-item';
+        label.innerHTML = `<input type="checkbox" value="${tag}" ${activeTags.has(tag)?'checked':''}> ${tag} <span class="filter-count">(${count})</span>`;
+        label.querySelector('input').addEventListener('change', function() {
+          this.checked ? activeTags.add(tag) : activeTags.delete(tag);
+          onFiltersChange();
+        });
+        tagsDiv.appendChild(label);
       });
     }
 
     // ============ MAIN ============
-    let allStations = [], currentStations = [], favoritesOnly = false, activeStationUuid = null, sleepTimerId = null;
+    let allStations = [], currentStations = [], favoritesOnly = false, activeStationUuid = null;
 
     function renderGrid(stations) {
       const gridEl = document.getElementById('station-grid');
       const emptyEl = document.getElementById('empty-state');
       const countEl = document.getElementById('grid-count');
-      if (!gridEl) return;
       gridEl.innerHTML = '';
+      
       if (!stations.length) {
         gridEl.style.display = 'none';
-        if (emptyEl) emptyEl.style.display = 'flex';
-        if (countEl) countEl.textContent = '0 emissoras';
+        emptyEl.style.display = 'flex';
+        countEl.textContent = '0 emissoras';
         return;
       }
-      gridEl.style.display = 'grid';
-      if (emptyEl) emptyEl.style.display = 'none';
-      if (countEl) countEl.textContent = `${stations.length} emissora${stations.length !== 1 ? 's' : ''}`;
       
-      for (const s of stations) {
+      gridEl.style.display = 'grid';
+      emptyEl.style.display = 'none';
+      countEl.textContent = `${stations.length} emissora${stations.length > 1 ? 's' : ''}`;
+      
+      stations.forEach(s => {
         const card = document.createElement('div');
-        card.className = 'station-card';
-        if (s.stationuuid === activeStationUuid) card.classList.add('station-card--active');
+        card.className = 'station-card' + (s.stationuuid === activeStationUuid ? ' station-card--active' : '');
         card.dataset.uuid = s.stationuuid;
-        const flag = getFlagEmoji(s.countrycode);
         const tags = (s.tags || '').split(',').map(t => t.trim()).filter(Boolean).slice(0, 3);
-        card.innerHTML = `<span class="station-card__flag">${flag}</span><span class="station-card__name">${escHtml(s.name)}</span><div class="station-card__tags">${tags.map(t => `<span class="tag-pill">${escHtml(t)}</span>`).join('')}</div><button class="station-card__play" title="Play">&#9654;</button>`;
-        card.addEventListener('click', e => { if (!e.target.closest('.station-card__play')) onStationClick(s); });
+        card.innerHTML = `
+          <span class="station-card__flag">🇧🇷</span>
+          <span class="station-card__name">${escHtml(s.name)}</span>
+          ${s.state ? `<div style="font-size:11px;color:#888">${s.state}</div>` : ''}
+          <div class="station-card__tags">${tags.map(t => `<span class="tag-pill">${escHtml(t)}</span>`).join('')}</div>
+          <button class="station-card__play">&#9654;</button>
+        `;
+        card.addEventListener('click', e => {
+          if (!e.target.closest('.station-card__play')) onStationClick(s);
+        });
         gridEl.appendChild(card);
-      }
-    }
-
-    function highlightCard(uuid) {
-      activeStationUuid = uuid;
-      document.querySelectorAll('.station-card').forEach(c => c.classList.toggle('station-card--active', c.dataset.uuid === uuid));
+      });
     }
 
     function updatePlayerBar(s) {
       if (!s) return;
-      document.getElementById('player-station').textContent = s.name || 'Unknown';
-      const parts = [];
-      if (s.state) parts.push(s.state);
-      if (s.country) parts.push(s.country);
-      if (s.bitrate) parts.push(`${s.bitrate} kbps`);
-      if (s.codec && s.codec !== 'UNKNOWN') parts.push(s.codec);
-      document.getElementById('player-meta').textContent = parts.join(' · ');
+      document.getElementById('player-station').textContent = s.name;
+      document.getElementById('player-meta').textContent = [s.state, s.bitrate ? `${s.bitrate} kbps` : '', s.codec].filter(Boolean).join(' · ');
       updateFavBtn();
     }
 
-    function updatePlayBtn() { document.getElementById('btn-play').innerHTML = isPlayingNow() ? '&#9208;' : '&#9654;'; }
+    function updatePlayBtn() {
+      document.getElementById('btn-play').innerHTML = isPlaying ? '&#9208;' : '&#9654;';
+    }
+
     function updateFavBtn() {
-      const btn = document.getElementById('btn-favorite');
       const s = getCurrentStation();
-      btn.classList.toggle('player-btn--active', s && isFavorite(s.stationuuid));
+      document.getElementById('btn-favorite').classList.toggle('player-btn--active', s && isFavorite(s.stationuuid));
     }
 
     function onStationClick(s) {
       if (!s) return;
       playStation(s);
-      setLastPlayed(s);
       updatePlayerBar(s);
       updatePlayBtn();
-      highlightCard(s.stationuuid);
+      activeStationUuid = s.stationuuid;
       highlightMapMarker(s.stationuuid);
+      renderGrid(currentStations);
     }
 
     function onFiltersChange() {
-      const filters = getActiveFilters();
-      filters.favoritesOnly = favoritesOnly;
-      filters.favoriteUuids = getFavorites();
-      currentStations = filterStations(allStations, filters);
+      currentStations = filterStations(allStations, {
+        ...getActiveFilters(),
+        favoritesOnly,
+        favoriteUuids: getFavorites()
+      });
       renderGrid(currentStations);
       updateMapMarkers(currentStations);
-      updateSearchStations(currentStations);
+      allForSearch = currentStations;
     }
 
     async function loadStations() {
       document.getElementById('station-grid').style.display = 'none';
-      document.getElementById('empty-state').style.display = 'flex';
-      document.getElementById('empty-state').innerHTML = '<div class="loading-spinner"></div><p>Carregando emissoras...</p>';
+      const emptyEl = document.getElementById('empty-state');
+      emptyEl.style.display = 'flex';
+      emptyEl.innerHTML = '<div class="loading-spinner"></div><p>Carregando rádios brasileiras...</p>';
       
       try {
-        const result = await fetchStations();
-        allStations = result.stations;
+        allStations = await fetchBrazilianStations();
         currentStations = allStations;
         renderGrid(allStations);
         initMap('map', allStations, onStationClick);
-        initSearch(allStations, onStationClick);
-        initFilters(allStations, onFiltersChange);
-        
-        const last = getLastPlayed();
-        if (last) updatePlayerBar(last);
-        
-        showToast(`${allStations.length} emissoras (${result.globalCount} globais + ${result.brCount} BR)`, 'success');
+        allForSearch = allStations;
+        renderFilterOptions(allStations);
+        showToast(`${allStations.length} rádios brasileiras carregadas`, 'success');
       } catch (err) {
-        console.error('Erro:', err);
-        document.getElementById('empty-state').innerHTML = `<p>Falha ao carregar.</p><button class="retry-btn" onclick="location.reload()">Tentar novamente</button>`;
-        showToast('Falha ao carregar emissoras', 'error');
+        console.error(err);
+        emptyEl.innerHTML = '<p>Erro ao carregar.</p><button class="btn-clear" onclick="location.reload()">Tentar novamente</button>';
+        showToast('Falha ao carregar', 'error');
       }
     }
 
-    function setupEvents() {
-      document.getElementById('btn-play').addEventListener('click', () => { togglePlay(); updatePlayBtn(); });
-      document.getElementById('btn-prev').addEventListener('click', () => {
-        playPrev(currentStations);
-        const s = getCurrentStation();
-        if (s) { updatePlayerBar(s); highlightCard(s.stationuuid); highlightMapMarker(s.stationuuid); }
-      });
-      document.getElementById('btn-next').addEventListener('click', () => {
-        playNext(currentStations);
-        const s = getCurrentStation();
-        if (s) { updatePlayerBar(s); highlightCard(s.stationuuid); highlightMapMarker(s.stationuuid); }
-      });
-      document.getElementById('volume').addEventListener('input', e => setVolume(e.target.value));
-      setVolume(0.8);
-      
-      document.getElementById('btn-favorite').addEventListener('click', () => {
-        const s = getCurrentStation();
-        if (!s) return;
-        const isFav = toggleFavorite(s.stationuuid);
-        updateFavBtn();
-        document.querySelector('.favorites-count').textContent = getFavorites().size;
-        showToast(isFav ? 'Adicionado aos favoritos' : 'Removido dos favoritos');
-        if (favoritesOnly) onFiltersChange();
-      });
-      
-      document.getElementById('favorites-toggle').addEventListener('click', function() {
-        favoritesOnly = !favoritesOnly;
-        this.classList.toggle('header-btn--active', favoritesOnly);
-        onFiltersChange();
-      });
-      
-      document.getElementById('filters-toggle').addEventListener('click', openFilters);
-      document.getElementById('close-filters').addEventListener('click', closeFilters);
-      document.getElementById('clear-filters').addEventListener('click', () => {
-        activeCountries.clear(); activeTags.clear(); activeBitrates.clear();
-        favoritesOnly = false;
-        document.getElementById('favorites-toggle').classList.remove('header-btn--active');
-        onFiltersChange();
-        closeFilters();
-      });
-      
-      // Sleep
-      document.getElementById('btn-sleep').addEventListener('click', e => {
-        e.stopPropagation();
-        document.getElementById('sleep-menu').classList.toggle('sleep-menu--open');
-      });
-      document.querySelectorAll('#sleep-menu button[data-min]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const mins = parseInt(btn.dataset.min);
-          if (sleepTimerId) { clearTimeout(sleepTimerId); sleepTimerId = null; }
-          if (mins > 0) {
-            sleepTimerId = setTimeout(() => { pause(); updatePlayBtn(); showToast('Timer de sono — pausado'); }, mins * 60000);
-            showToast(`Timer: ${mins} min`);
-          } else showToast('Timer desligado');
-          document.getElementById('sleep-menu').classList.remove('sleep-menu--open');
-        });
-      });
-      
-      // Keyboard
-      document.addEventListener('keydown', e => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
-        if (e.key === 'Escape') { closeSearch(); closeFilters(); }
-      });
-      
-      // Player errors
-      initPlayer(
-        () => {
-          showToast('Emissora indisponível', 'error');
-          updatePlayBtn();
-          setTimeout(() => {
-            playNext(currentStations);
-            const s = getCurrentStation();
-            if (s) { updatePlayerBar(s); highlightCard(s.stationuuid); highlightMapMarker(s.stationuuid); updatePlayBtn(); }
-          }, 1500);
-        },
-        () => updatePlayBtn()
-      );
-    }
+    // ============ EVENTOS ============
+    document.getElementById('btn-play').addEventListener('click', () => { togglePlay(); updatePlayBtn(); });
+    document.getElementById('btn-prev').addEventListener('click', () => {
+      playPrev(currentStations);
+      const s = getCurrentStation();
+      if (s) { updatePlayerBar(s); activeStationUuid = s.stationuuid; renderGrid(currentStations); highlightMapMarker(s.stationuuid); }
+    });
+    document.getElementById('btn-next').addEventListener('click', () => {
+      playNext(currentStations);
+      const s = getCurrentStation();
+      if (s) { updatePlayerBar(s); activeStationUuid = s.stationuuid; renderGrid(currentStations); highlightMapMarker(s.stationuuid); }
+    });
+    
+    document.getElementById('volume').addEventListener('input', e => setVolume(e.target.value));
+    setVolume(0.8);
+    
+    document.getElementById('btn-favorite').addEventListener('click', () => {
+      const s = getCurrentStation();
+      if (!s) return;
+      toggleFavorite(s.stationuuid);
+      updateFavBtn();
+      document.querySelector('.favorites-count').textContent = getFavorites().size;
+      if (favoritesOnly) onFiltersChange();
+    });
+    
+    document.getElementById('favorites-toggle').addEventListener('click', function() {
+      favoritesOnly = !favoritesOnly;
+      this.classList.toggle('header-btn--active', favoritesOnly);
+      onFiltersChange();
+    });
+    
+    document.getElementById('filters-toggle').addEventListener('click', () => {
+      document.getElementById('filter-sidebar').classList.add('filter-sidebar--open');
+    });
+    
+    document.getElementById('close-filters').addEventListener('click', () => {
+      document.getElementById('filter-sidebar').classList.remove('filter-sidebar--open');
+    });
+    
+    document.getElementById('clear-filters').addEventListener('click', () => {
+      activeStates.clear(); activeTags.clear();
+      favoritesOnly = false;
+      document.getElementById('favorites-toggle').classList.remove('header-btn--active');
+      onFiltersChange();
+      document.getElementById('filter-sidebar').classList.remove('filter-sidebar--open');
+    });
+    
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+    });
 
-    // Start
+    // Iniciar
     document.querySelector('.favorites-count').textContent = getFavorites().size;
-    setupEvents();
     loadStations();
   </script>
 </body>
