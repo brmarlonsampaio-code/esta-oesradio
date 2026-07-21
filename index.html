@@ -1,170 +1,2028 @@
-// ============ API & CARREGAMENTO (CORRIGIDO) ============
-async function fetchStations() {
-  const headers = { 'User-Agent': 'RadioGlobal/1.0' };
-  let globalData = [];
-  let todasBR = [];
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radio // Brasil + Global</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Leaflet + MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
-  try {
-    // CORREÇÃO: Adicionar lastcheckok=1 para só trazer estações online
-    const globalResp = await fetch(
-      'https://de1.api.radio-browser.info/json/stations/topclick/200?lastcheckok=1&hidebroken=true', 
-      { headers }
-    );
-    if (globalResp.ok) globalData = await globalResp.json();
-  } catch (e) { console.warn('Erro ao carregar globais:', e); }
-
-  try {
-    const brResp = await fetch(
-      'https://de1.api.radio-browser.info/json/stations/bycountry/brazil?lastcheckok=1&hidebroken=true&limit=200', 
-      { headers }
-    );
-    if (brResp.ok) todasBR = await brResp.json();
-  } catch (e) { console.warn('Erro ao carregar BR:', e); }
-
-  // REMOVIDO: Rádio UESB está offline — substituir por uma funcional
-  const radiosManuais = [
-    // Adicione aqui apenas URLs que você testou e funcionam
-    // {
-    //   stationuuid: "radio-exemplo",
-    //   name: "Rádio Exemplo",
-    //   url_resolved: "https://stream.exemplo.com/radio",
-    //   country: "Brazil",
-    //   state: "São Paulo",
-    //   geo_lat: -23.55,
-    //   geo_long: -46.63
-    // }
-  ];
-
-  const combinadas = [...globalData, ...todasBR, ...radiosManuais];
-  
-  const unicas = [];
-  const vistas = new Set();
-  
-  for (const s of combinadas) {
-    if (s.stationuuid && !vistas.has(s.stationuuid)) {
-      vistas.add(s.stationuuid);
-      
-      // CORREÇÃO: SEMPRE usar url_resolved (já resolvido pela API)
-      // NUNCA converter HTTP→HTTPS — deixa o navegador tentar
-      let streamUrl = s.url_resolved;
-      
-      // CORREÇÃO: Pular streams HLS (não funcionam em <audio> nativo)
-      if (s.hls === 1 || s.hls === '1') {
-        console.warn(`Pulando estação HLS: ${s.name}`);
-        continue;
-      }
-      
-      // CORREÇÃO: Pular se não tiver URL válida
-      if (!streamUrl) {
-        console.warn(`Pulando estação sem URL: ${s.name}`);
-        continue;
-      }
-      
-      s.url_resolved = streamUrl;
-      unicas.push(s);
+  <style>
+    /* ========================================
+       Radio // Global - Styles
+       ======================================== */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
     }
-  }
-
-  return unicas;
-}
-
-// ============ MAPA (CORRIGIDO - Geocodificação fallback) ============
-function updateMapMarkers(stations) {
-  markerClusterGroup.clearLayers();
-  markersMap.clear();
-
-  // Coordenadas aproximadas por estado do Brasil
-  const brStateCoords = {
-    'Acre': [-9.02, -70.81], 'Alagoas': [-9.57, -36.78], 'Amapá': [1.41, -51.77],
-    'Amazonas': [-3.47, -65.10], 'Bahia': [-12.97, -41.70], 'Ceará': [-5.20, -39.53],
-    'Distrito Federal': [-15.80, -47.88], 'Espírito Santo': [-19.18, -40.34],
-    'Goiás': [-15.93, -49.26], 'Maranhão': [-5.42, -45.44], 'Mato Grosso': [-12.64, -55.42],
-    'Mato Grosso do Sul': [-20.51, -54.54], 'Minas Gerais': [-18.10, -44.38],
-    'Pará': [-5.53, -52.29], 'Paraíba': [-7.24, -36.78], 'Paraná': [-24.89, -51.55],
-    'Pernambuco': [-8.38, -37.86], 'Piauí': [-6.60, -42.28], 'Rio de Janeiro': [-22.25, -42.66],
-    'Rio Grande do Norte': [-5.81, -36.59], 'Rio Grande do Sul': [-30.01, -51.22],
-    'Rondônia': [-10.83, -63.34], 'Roraima': [1.89, -61.22], 'Santa Catarina': [-27.33, -50.88],
-    'São Paulo': [-22.55, -48.64], 'Sergipe': [-10.57, -37.45], 'Tocantins': [-10.17, -48.33]
-  };
-
-  // Coordenadas aproximadas por país
-  const countryCoords = {
-    'France': [46.23, 2.21], 'Germany': [51.17, 10.45], 'United Kingdom': [55.38, -3.44],
-    'United States': [37.09, -95.71], 'Italy': [41.87, 12.57], 'Spain': [40.46, -3.75],
-    'Portugal': [39.40, -8.22], 'Netherlands': [52.13, 5.29], 'Belgium': [50.50, 4.47],
-    'Switzerland': [46.82, 8.23], 'Austria': [47.52, 14.55], 'Poland': [51.92, 19.15],
-    'Russia': [61.52, 105.32], 'Japan': [36.20, 138.25], 'China': [35.86, 104.19],
-    'India': [20.59, 78.96], 'Australia': [-25.27, 133.78], 'Canada': [56.13, -106.35],
-    'Brazil': [-14.24, -51.93], 'Mexico': [23.63, -102.55]
-  };
-
-  stations.forEach(s => {
-    let lat = parseFloat(s.geo_lat);
-    let lng = parseFloat(s.geo_long);
-    
-    // CORREÇÃO: Se não tiver coordenadas, tentar inferir do estado/país
-    if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
-      const state = (s.state || '').trim();
-      const country = (s.country || '').trim();
-      
-      if (s.countrycode === 'BR' || country === 'Brazil') {
-        // Procurar estado do Brasil
-        for (const [estado, coords] of Object.entries(brStateCoords)) {
-          if (state.toLowerCase().includes(estado.toLowerCase()) || 
-              estado.toLowerCase().includes(state.toLowerCase())) {
-            [lat, lng] = coords;
-            break;
-          }
-        }
-      }
-      
-      // Se ainda não achou, tentar pelo país
-      if (!lat || !lng) {
-        for (const [pais, coords] of Object.entries(countryCoords)) {
-          if (country.toLowerCase().includes(pais.toLowerCase())) {
-            [lat, lng] = coords;
-            break;
-          }
-        }
-      }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #111;
+      background: #fff;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    button {
+      font-family: inherit;
+      cursor: pointer;
     }
 
-    if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-      const marker = L.circleMarker([lat, lng], {
-        radius: 6, color: '#111', fillColor: '#111', fillOpacity: 0.7
+    /* Toast */
+    #toast-container {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 300ms ease, opacity 300ms ease;
+      max-width: 320px;
+    }
+    .toast--visible {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .toast--error {
+      background: #c00;
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      flex-shrink: 0;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      background: #fff;
+      color: #111;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+    .header-btn:hover {
+      background: #f5f5f5;
+      border-color: #ccc;
+    }
+    .header-btn--active {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+    .heart-icon {
+      font-size: 14px;
+      color: #888;
+      transition: color 150ms ease;
+    }
+    .header-btn--active .heart-icon {
+      color: #fff;
+    }
+    .favorites-count {
+      font-size: 12px;
+      font-weight: 600;
+      min-width: 16px;
+      text-align: center;
+    }
+    .kbd-hint {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: 4px;
+    }
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 4px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f9f9f9;
+      font-size: 11px;
+      font-family: inherit;
+      color: #666;
+      line-height: 1;
+    }
+
+    /* Main Layout */
+    .main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 52px - 72px);
+      overflow: hidden;
+    }
+    .panel {
+      height: 100%;
+      overflow: hidden;
+    }
+    .panel--grid {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #eee;
+    }
+    .panel--map {
+      width: 60%;
+      position: relative;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Grid Header */
+    .grid-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      flex-shrink: 0;
+    }
+    .grid-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+      color: #111;
+    }
+    .grid-count {
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* Station Grid */
+    .station-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 0 20px 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* Station Card */
+    .station-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+      position: relative;
+    }
+    .station-card:hover {
+      border-color: #ccc;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    .station-card--active {
+      border-color: #111;
+      box-shadow: 0 0 0 1px #111;
+    }
+    .station-card__flag {
+      font-size: 28px;
+      line-height: 1;
+    }
+    .station-card__name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .station-card__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .tag-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .station-card__play {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid #eee;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 150ms ease, background 150ms ease, border-color 150ms ease;
+      color: #111;
+    }
+    .station-card:hover .station-card__play {
+      opacity: 1;
+    }
+    .station-card__play:hover {
+      background: #f5f5f5;
+      border-color: #ccc;
+    }
+    .station-card--active .station-card__play {
+      opacity: 1;
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 60px 20px;
+      text-align: center;
+      color: #888;
+      flex: 1;
+    }
+    .empty-state p {
+      margin: 0;
+      font-size: 14px;
+    }
+    .btn-clear {
+      padding: 8px 16px;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      background: #fff;
+      color: #111;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+    .btn-clear:hover {
+      background: #f5f5f5;
+      border-color: #ccc;
+    }
+
+    /* Loading State */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 60px 20px;
+      flex: 1;
+      color: #888;
+    }
+    .loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #eee;
+      border-top-color: #111;
+      border-radius: 50%;
+      animation: spin 600ms linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Player Bar */
+    .player-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: #fff;
+      border-top: 1px solid #eee;
+      gap: 16px;
+    }
+    .player-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .player-station {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-meta {
+      font-size: 12px;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .player-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #111;
+      transition: background 150ms ease;
+      padding: 0;
+      line-height: 1;
+    }
+    .player-btn:hover {
+      background: #f5f5f5;
+    }
+    .player-btn--large {
+      width: 44px;
+      height: 44px;
+      font-size: 20px;
+    }
+    .player-btn--active {
+      color: #e00;
+    }
+    .player-extras {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Volume Slider */
+    .volume-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 80px;
+      height: 4px;
+      border-radius: 2px;
+      background: #eee;
+      outline: none;
+      cursor: pointer;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #111;
+      cursor: pointer;
+      border: none;
+    }
+    .volume-slider::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #111;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* Sleep Dropdown */
+    .sleep-dropdown {
+      position: relative;
+    }
+    .sleep-menu {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      display: none;
+      flex-direction: column;
+      min-width: 100px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 4px;
+      z-index: 200;
+    }
+    .sleep-menu--open {
+      display: flex;
+    }
+    .sleep-menu button {
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #111;
+      text-align: left;
+      transition: background 150ms ease;
+      font-family: inherit;
+    }
+    .sleep-menu button:hover {
+      background: #f5f5f5;
+    }
+
+    /* Search Modal */
+    .search-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 120px;
+    }
+    .search-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .search-container {
+      position: relative;
+      width: 560px;
+      max-width: calc(100vw - 40px);
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .search-input {
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+      font-family: inherit;
+      color: #111;
+      outline: none;
+      background: #fff;
+    }
+    .search-input::placeholder {
+      color: #888;
+    }
+    .search-results {
+      max-height: 360px;
+      overflow-y: auto;
+      padding: 8px;
+    }
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+    .search-result-item:hover,
+    .search-result-item--active {
+      background: #f5f5f5;
+    }
+    .search-result-item__flag {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .search-result-item__info {
+      flex: 1;
+      min-width: 0;
+    }
+    .search-result-item__name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #111;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .search-result-item__meta {
+      font-size: 12px;
+      color: #888;
+    }
+    .search-footer {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 16px;
+      border-top: 1px solid #eee;
+      font-size: 12px;
+      color: #888;
+    }
+    .search-footer span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Filter Sidebar */
+    .filter-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 320px;
+      height: 100vh;
+      background: #fff;
+      border-left: 1px solid #eee;
+      z-index: 400;
+      transform: translateX(100%);
+      transition: transform 300ms ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .filter-sidebar--open {
+      transform: translateX(0);
+    }
+    .filter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #eee;
+      flex-shrink: 0;
+    }
+    .filter-header h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #666;
+      transition: background 150ms ease;
+      padding: 0;
+    }
+    .close-btn:hover {
+      background: #f5f5f5;
+    }
+    .filter-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+    .filter-section {
+      margin-bottom: 24px;
+    }
+    .filter-section h4 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #111;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .filter-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .filter-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 150ms ease;
+      font-size: 13px;
+    }
+    .filter-item:hover {
+      background: #f5f5f5;
+    }
+    .filter-item--active {
+      background: #f5f5f5;
+    }
+    .filter-item--active .filter-item__check {
+      background: #111;
+      border-color: #111;
+    }
+    .filter-item--active .filter-item__check::after {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 7px;
+      border: solid #fff;
+      border-width: 0 1.5px 1.5px 0;
+      transform: rotate(45deg);
+      margin-top: -1px;
+    }
+    .filter-item__label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+    .filter-item__name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .filter-item__count {
+      font-size: 12px;
+      color: #888;
+      flex-shrink: 0;
+    }
+    .filter-item__check {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #ddd;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    /* Leaflet Overrides */
+    .leaflet-container {
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .marker-cluster-small,
+    .marker-cluster-medium,
+    .marker-cluster-large {
+      background-color: rgba(17, 17, 17, 0.15);
+    }
+    .marker-cluster-small div,
+    .marker-cluster-medium div,
+    .marker-cluster-large div {
+      background-color: #111;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: 8px;
+      padding: 0;
+      overflow: hidden;
+    }
+    .leaflet-popup-content {
+      margin: 0;
+      padding: 12px 16px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main {
+        flex-direction: column;
+        height: calc(100vh - 52px - 100px);
+      }
+      .panel--grid {
+        width: 100%;
+        height: 50%;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+      }
+      .panel--map {
+        width: 100%;
+        height: 50%;
+      }
+      .station-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .player-bar {
+        height: 100px;
+        flex-wrap: wrap;
+        padding: 12px 16px;
+        gap: 8px;
+      }
+      .player-info {
+        width: 100%;
+        flex: none;
+        order: 1;
+      }
+      .player-controls {
+        order: 2;
+      }
+      .player-extras {
+        order: 3;
+        margin-left: auto;
+      }
+      .filter-sidebar {
+        width: 100%;
+      }
+      .search-container {
+        max-width: calc(100vw - 20px);
+        margin: 0 10px;
+      }
+      .kbd-hint {
+        display: none;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #ddd;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #bbb;
+    }
+
+    /* Retry button */
+    .retry-btn {
+      padding: 8px 16px;
+      border: 1px solid #111;
+      border-radius: 6px;
+      background: #111;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      transition: opacity 150ms ease;
+    }
+    .retry-btn:hover {
+      opacity: 0.85;
+    }
+
+    /* Brazil highlight button */
+    .brazil-btn {
+      background: #009c3b;
+      color: #fff;
+      border-color: #009c3b;
+    }
+    .brazil-btn:hover {
+      background: #007a2e;
+      border-color: #007a2e;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <a href="/" class="logo">RADIO // 🇧🇷</a>
+    </div>
+    <div class="header-right">
+      <button class="header-btn brazil-btn" id="brazil-only-btn" title="Mostrar apenas rádios brasileiras">🇧🇷 Brasil</button>
+      <button class="header-btn" id="favorites-toggle">
+        <span class="heart-icon">&#9829;</span>
+        <span class="favorites-count" id="fav-count">0</span>
+      </button>
+      <button class="header-btn" id="filters-toggle">Filtros</button>
+      <span class="kbd-hint"><kbd>&#8984;</kbd><kbd>K</kbd></span>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <section class="panel panel--grid" id="grid-panel">
+      <div class="grid-header">
+        <h2 class="grid-title" id="grid-title">Todas as emissoras</h2>
+        <span class="grid-count" id="grid-count">0 emissoras</span>
+      </div>
+      <div class="station-grid" id="station-grid"></div>
+      <div class="empty-state" id="empty-state" style="display:none;">
+        <p>Nenhuma emissora corresponde aos filtros.</p>
+        <button class="btn-clear" id="clear-filters">Limpar filtros</button>
+      </div>
+    </section>
+
+    <section class="panel panel--map" id="map-panel">
+      <div id="map"></div>
+    </section>
+  </main>
+
+  <!-- Player Bar -->
+  <footer class="player-bar" id="player-bar">
+    <div class="player-info">
+      <div class="player-station" id="player-station">Selecione uma emissora</div>
+      <div class="player-meta" id="player-meta"></div>
+    </div>
+    <div class="player-controls">
+      <button class="player-btn" id="btn-prev">&#9198;</button>
+      <button class="player-btn player-btn--large" id="btn-play">&#9654;</button>
+      <button class="player-btn" id="btn-next">&#9197;</button>
+    </div>
+    <div class="player-extras">
+      <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.01" value="0.8" />
+      <button class="player-btn" id="btn-favorite">&#9829;</button>
+      <div class="sleep-dropdown">
+        <button class="player-btn" id="btn-sleep">&#128164;</button>
+        <div class="sleep-menu" id="sleep-menu">
+          <button data-min="15">15 min</button>
+          <button data-min="30">30 min</button>
+          <button data-min="60">60 min</button>
+          <button data-min="90">90 min</button>
+          <button data-min="0">Off</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Search Modal -->
+  <div class="search-modal" id="search-modal" style="display:none;">
+    <div class="search-backdrop"></div>
+    <div class="search-container">
+      <input type="text" class="search-input" id="search-input" placeholder="Buscar emissoras, países, tags..." />
+      <div class="search-results" id="search-results"></div>
+      <div class="search-footer">
+        <span><kbd>&#8593;</kbd><kbd>&#8595;</kbd> Navegar</span>
+        <span><kbd>&#8629;</kbd> Tocar</span>
+        <span><kbd>Esc</kbd> Fechar</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Sidebar -->
+  <aside class="filter-sidebar" id="filter-sidebar">
+    <div class="filter-header">
+      <h3>Filtros</h3>
+      <button class="close-btn" id="close-filters">&#10005;</button>
+    </div>
+    <div class="filter-body" id="filter-body">
+      <div class="filter-section">
+        <h4>País</h4>
+        <div class="filter-list" id="filter-countries"></div>
+      </div>
+      <div class="filter-section">
+        <h4>Tags</h4>
+        <div class="filter-list" id="filter-tags"></div>
+      </div>
+      <div class="filter-section">
+        <h4>Bitrate</h4>
+        <div class="filter-list" id="filter-bitrates"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Audio Element -->
+  <audio id="audio-player" crossorigin="anonymous"></audio>
+
+  <!-- Import Map -->
+  <script type="importmap">
+    {
+      "imports": {
+        "leaflet": "https://esm.sh/leaflet@1.9.4",
+        "leaflet.markercluster": "https://esm.sh/leaflet.markercluster@1.5.3"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import L from 'leaflet';
+    import 'leaflet.markercluster';
+
+    // =============================================================
+    // TOAST
+    // =============================================================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      if (type === 'error') toast.classList.add('toast--error');
+      toast.textContent = message;
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          toast.classList.add('toast--visible');
+        });
       });
-      marker.bindPopup(`<strong>${s.name}</strong><br>${s.country || ''}${s.state ? ' - ' + s.state : ''}`);
-      marker.on('click', () => playStation(s));
-      markerClusterGroup.addLayer(marker);
-      markersMap.set(s.stationuuid, marker);
+      setTimeout(() => {
+        toast.classList.remove('toast--visible');
+        toast.addEventListener('transitionend', () => {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, { once: true });
+        setTimeout(() => {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 400);
+      }, 3000);
     }
-  });
-}
 
-// ============ REPRODUTOR (CORRIGIDO) ============
-function handleAudioError(station, err) {
-  isPlaying = false;
-  document.getElementById('btn-play').textContent = '▶';
-  
-  let message;
-  let isMixedContent = false;
-  
-  // Detectar Mixed Content
-  if (window.location.protocol === 'https:' && station?.url_resolved?.startsWith('http://')) {
-    isMixedContent = true;
-    message = `🔒 ${station.name} — Stream HTTP bloqueado pelo navegador (Mixed Content).`;
-  } else if (err?.name === 'NotSupportedError') {
-    message = `❌ ${station.name} — Formato de áudio não suportado.`;
-  } else {
-    message = `📡 ${station.name} — Stream offline ou inacessível.`;
-  }
-  
-  console.warn('Erro ao reproduzir:', err);
-  showToast(message, 'error');
-}
+    // =============================================================
+    // STORAGE
+    // =============================================================
+    const FAV_KEY = 'radio.favorites.v2';
+    const LAST_KEY = 'radio.lastPlayed.v2';
 
-// CORREÇÃO: Evento de erro nativo
-audio.addEventListener('error', (e) => {
-  const error = e.target.error;
-  handleAudioError(currentStation, error || new Error('Erro de reprodução nativa'));
-});
+    function getFavorites() {
+      try {
+        const raw = localStorage.getItem(FAV_KEY);
+        if (!raw) return new Set();
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return new Set(parsed);
+        return new Set();
+      } catch { return new Set(); }
+    }
+    
+    function saveFavorites(favs) {
+      localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(favs)));
+    }
+    
+    function toggleFavorite(uuid) {
+      const favs = getFavorites();
+      if (favs.has(uuid)) {
+        favs.delete(uuid);
+        saveFavorites(favs);
+        return false;
+      } else {
+        favs.add(uuid);
+        saveFavorites(favs);
+        return true;
+      }
+    }
+    
+    function isFavorite(uuid) {
+      return getFavorites().has(uuid);
+    }
+    
+    function getLastPlayed() {
+      try {
+        const raw = localStorage.getItem(LAST_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch { return null; }
+    }
+    
+    function setLastPlayed(station) {
+      try {
+        localStorage.setItem(LAST_KEY, JSON.stringify({
+          stationuuid: station.stationuuid,
+          name: station.name,
+          country: station.country,
+          url_resolved: station.url_resolved
+        }));
+      } catch { /* ignore */ }
+    }
+
+    // =============================================================
+    // API - MÚLTIPLAS BUSCAS PARA MAXIMIZAR RÁDIOS BRASILEIRAS
+    // =============================================================
+    async function fetchStations() {
+      const headers = { 'User-Agent': 'RadioBrasilGlobal/2.0' };
+      const baseURL = 'https://de1.api.radio-browser.info/json';
+      
+      // Estratégia múltipla para capturar o máximo de rádios brasileiras
+      const urls = [
+        // Rádios brasileiras por diferentes critérios
+        `${baseURL}/stations/search?countrycode=BR&limit=500&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&limit=500&hidebroken=true&offset=500`,
+        `${baseURL}/stations/search?countrycode=BR&limit=500&hidebroken=true&offset=1000`,
+        `${baseURL}/stations/search?countrycode=BR&limit=500&hidebroken=true&offset=1500`,
+        // Rádios brasileiras por estado (principais)
+        `${baseURL}/stations/search?countrycode=BR&state=São%20Paulo&limit=200&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&state=Rio%20de%20Janeiro&limit=200&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&state=Minas%20Gerais&limit=200&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&state=Bahia&limit=200&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&state=Paraná&limit=200&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&state=Rio%20Grande%20do%20Sul&limit=200&hidebroken=true`,
+        // Rádios brasileiras por tags populares
+        `${baseURL}/stations/search?countrycode=BR&tag=pop&limit=200&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&tag=rock&limit=200&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&tag=sertanejo&limit=200&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&tag=mpb&limit=200&hidebroken=true`,
+        `${baseURL}/stations/search?countrycode=BR&tag=notícias&limit=200&hidebroken=true`,
+        // Rádios brasileiras por ordem de clique
+        `${baseURL}/stations/topclick/300?countrycode=BR`,
+        `${baseURL}/stations/topvote/300?countrycode=BR`,
+        // Globais populares (para variedade)
+        `${baseURL}/stations/topclick/200`,
+      ];
+
+      try {
+        // Buscar todas as URLs em paralelo (em lotes para não sobrecarregar)
+        const results = [];
+        const batchSize = 5;
+        
+        for (let i = 0; i < urls.length; i += batchSize) {
+          const batch = urls.slice(i, i + batchSize);
+          const batchResults = await Promise.allSettled(
+            batch.map(url => fetch(url, { headers }).then(r => r.ok ? r.json() : []))
+          );
+          
+          for (const result of batchResults) {
+            if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+              results.push(...result.value);
+            }
+          }
+        }
+
+        // Remover duplicatas por stationuuid
+        const uniqueMap = new Map();
+        for (const station of results) {
+          if (station.stationuuid && !uniqueMap.has(station.stationuuid)) {
+            uniqueMap.set(station.stationuuid, station);
+          }
+        }
+        
+        const unique = Array.from(uniqueMap.values());
+        
+        // Filtrar apenas streams válidos
+        const filtered = unique.filter(station => {
+          return (
+            station.url_resolved &&
+            station.url_resolved.startsWith('https://') &&
+            station.name &&
+            station.name.trim().length > 0 &&
+            station.codec !== 'UNKNOWN'
+          );
+        });
+
+        // Separar brasileiras e internacionais
+        const brazilStations = filtered.filter(s => s.countrycode === 'BR');
+        const internationalStations = filtered.filter(s => s.countrycode !== 'BR');
+        
+        // Priorizar brasileiras: pegar todas as BR + top internacionais
+        const topInternational = internationalStations.slice(0, 100);
+        const finalStations = [...brazilStations, ...topInternational];
+        
+        console.log(`📻 Carregadas: ${finalStations.length} total (${brazilStations.length} 🇧🇷 + ${topInternational.length} 🌍)`);
+        
+        return finalStations;
+      } catch (err) {
+        console.error('Erro ao buscar estações:', err);
+        throw err;
+      }
+    }
+
+    // =============================================================
+    // FILTER FUNCTIONS
+    // =============================================================
+    function getTopCountries(stations, limit = 30) {
+      const counts = {};
+      for (const s of stations) {
+        const country = s.country && s.country.trim() ? s.country.trim() : 'Unknown';
+        counts[country] = (counts[country] || 0) + 1;
+      }
+      return Object.entries(counts)
+        .map(([country, count]) => ({ country, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+    }
+
+    function getTopTags(stations, limit = 30) {
+      const counts = {};
+      for (const s of stations) {
+        if (s.tags) {
+          const tagList = s.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+          const seen = new Set();
+          for (const tag of tagList) {
+            if (!seen.has(tag)) {
+              seen.add(tag);
+              counts[tag] = (counts[tag] || 0) + 1;
+            }
+          }
+        }
+      }
+      return Object.entries(counts)
+        .map(([tag, count]) => ({ tag, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+    }
+
+    function getBitrateBuckets(stations) {
+      const buckets = {
+        '0-64': 0,
+        '64-128': 0,
+        '128-192': 0,
+        '192-320': 0,
+        '320+': 0
+      };
+      for (const s of stations) {
+        const bitrate = parseInt(s.bitrate, 10) || 0;
+        if (bitrate <= 64) buckets['0-64']++;
+        else if (bitrate <= 128) buckets['64-128']++;
+        else if (bitrate <= 192) buckets['128-192']++;
+        else if (bitrate <= 320) buckets['192-320']++;
+        else buckets['320+']++;
+      }
+      return buckets;
+    }
+
+    function bitrateInBucket(bitrate, bucket) {
+      const b = parseInt(bitrate, 10) || 0;
+      switch (bucket) {
+        case '0-64': return b <= 64;
+        case '64-128': return b > 64 && b <= 128;
+        case '128-192': return b > 128 && b <= 192;
+        case '192-320': return b > 192 && b <= 320;
+        case '320+': return b > 320;
+        default: return false;
+      }
+    }
+
+    function filterStations(stations, filters) {
+      const {
+        query = '',
+        countries = [],
+        tags = [],
+        bitrates = [],
+        favoritesOnly = false,
+        favoriteUuids = new Set(),
+        brazilOnly = false
+      } = filters;
+      const queryLower = query.toLowerCase().trim();
+      return stations.filter(s => {
+        if (favoritesOnly && !favoriteUuids.has(s.stationuuid)) return false;
+        if (brazilOnly && s.countrycode !== 'BR') return false;
+        if (countries.length > 0) {
+          const stationCountry = s.country && s.country.trim() ? s.country.trim() : 'Unknown';
+          if (!countries.includes(stationCountry)) return false;
+        }
+        if (tags.length > 0) {
+          const stationTags = s.tags ? s.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) : [];
+          const hasTag = tags.some(tag => stationTags.includes(tag));
+          if (!hasTag) return false;
+        }
+        if (bitrates.length > 0) {
+          const matches = bitrates.some(bucket => bitrateInBucket(s.bitrate, bucket));
+          if (!matches) return false;
+        }
+        if (queryLower) {
+          const nameMatch = s.name && s.name.toLowerCase().includes(queryLower);
+          const countryMatch = s.country && s.country.toLowerCase().includes(queryLower);
+          const tagMatch = s.tags && s.tags.toLowerCase().includes(queryLower);
+          if (!nameMatch && !countryMatch && !tagMatch) return false;
+        }
+        return true;
+      });
+    }
+
+    // =============================================================
+    // MAP
+    // =============================================================
+    let map = null;
+    let markerClusterGroup = null;
+    let markersMap = new Map();
+    let onStationClickCallback = null;
+
+    function initMap(containerId, stations, onStationClick) {
+      onStationClickCallback = onStationClick;
+      map = L.map(containerId, {
+        center: [-14, -52],
+        zoom: 4,
+        zoomControl: true,
+        attributionControl: true
+      });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(map);
+      markerClusterGroup = L.markerClusterGroup({
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        maxClusterRadius: 60
+      });
+      map.addLayer(markerClusterGroup);
+      updateMapMarkers(stations);
+      return { map, markersLayer: markerClusterGroup };
+    }
+
+    function updateMapMarkers(stations) {
+      if (!markerClusterGroup) return;
+      markerClusterGroup.clearLayers();
+      markersMap.clear();
+      for (const station of stations) {
+        const lat = parseFloat(station.geo_lat);
+        const lng = parseFloat(station.geo_long);
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) continue;
+        
+        const isBrazil = station.countrycode === 'BR';
+        const marker = L.circleMarker([lat, lng], {
+          radius: isBrazil ? 7 : 5,
+          color: isBrazil ? '#009c3b' : '#111',
+          weight: 1.5,
+          fillColor: isBrazil ? '#009c3b' : '#111',
+          fillOpacity: isBrazil ? 0.8 : 0.6
+        });
+        const popupContent = `<strong>${escapeHtml(station.name)}</strong><br>${escapeHtml(station.country || '')}${station.state ? ' - ' + escapeHtml(station.state) : ''}`;
+        marker.bindPopup(popupContent);
+        marker.on('click', () => {
+          if (onStationClickCallback) onStationClickCallback(station);
+        });
+        markerClusterGroup.addLayer(marker);
+        markersMap.set(station.stationuuid, marker);
+      }
+    }
+
+    function highlightMapMarker(stationUuid) {
+      const marker = markersMap.get(stationUuid);
+      if (!marker || !map) return;
+      map.panTo(marker.getLatLng(), { animate: true, duration: 0.5 });
+      marker.openPopup();
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // =============================================================
+    // PLAYER
+    // =============================================================
+    let audio = null;
+    let currentStation = null;
+    let isPlaying = false;
+
+    function initPlayer() {
+      audio = document.getElementById('audio-player');
+      if (!audio) return;
+      
+      audio.addEventListener('error', () => {
+        isPlaying = false;
+        updatePlayBtnState();
+        showToast('Emissora indisponível, tentando próxima...', 'error');
+        setTimeout(() => {
+          playNext(currentStations);
+          const station = getCurrentStation();
+          if (station) {
+            setLastPlayed(station);
+            updatePlayerBar(station);
+            highlightCard(station.stationuuid);
+            highlightMapMarker(station.stationuuid);
+            updatePlayBtnState();
+          }
+        }, 1500);
+      });
+      
+      audio.addEventListener('ended', () => {
+        isPlaying = false;
+        updatePlayBtnState();
+      });
+      
+      audio.addEventListener('playing', () => { isPlaying = true; updatePlayBtnState(); });
+      audio.addEventListener('pause', () => { isPlaying = false; updatePlayBtnState(); });
+    }
+
+    function playStation(station) {
+      if (!audio || !station || !station.url_resolved) return;
+      
+      if (currentStation && currentStation.stationuuid === station.stationuuid) {
+        if (audio.paused) {
+          audio.play().catch(() => {
+            isPlaying = false;
+            updatePlayBtnState();
+          });
+        }
+        return;
+      }
+      
+      currentStation = station;
+      audio.src = station.url_resolved;
+      audio.load();
+      audio.play().catch(() => {
+        isPlaying = false;
+        updatePlayBtnState();
+      });
+      isPlaying = true;
+    }
+
+    function togglePlay() {
+      if (!audio) return;
+      if (audio.paused) {
+        audio.play().catch(() => {
+          isPlaying = false;
+          updatePlayBtnState();
+        });
+        isPlaying = true;
+      } else {
+        audio.pause();
+        isPlaying = false;
+      }
+      updatePlayBtnState();
+    }
+
+    function pause() {
+      if (!audio) return;
+      audio.pause();
+      isPlaying = false;
+    }
+
+    function setVolume(value) {
+      if (!audio) return;
+      const vol = parseFloat(value);
+      if (!isNaN(vol)) audio.volume = Math.max(0, Math.min(1, vol));
+    }
+
+    function getCurrentStation() { return currentStation; }
+    function isPlayingNow() { return isPlaying; }
+
+    function playNext(stations) {
+      if (!stations || stations.length === 0) return;
+      if (!currentStation) {
+        playStation(stations[0]);
+        return;
+      }
+      const idx = stations.findIndex(s => s.stationuuid === currentStation.stationuuid);
+      const nextIdx = idx >= 0 ? (idx + 1) % stations.length : 0;
+      playStation(stations[nextIdx]);
+    }
+
+    function playPrev(stations) {
+      if (!stations || stations.length === 0) return;
+      if (!currentStation) {
+        playStation(stations[0]);
+        return;
+      }
+      const idx = stations.findIndex(s => s.stationuuid === currentStation.stationuuid);
+      const prevIdx = idx >= 0 ? (idx - 1 + stations.length) % stations.length : 0;
+      playStation(stations[prevIdx]);
+    }
+
+    // =============================================================
+    // SEARCH
+    // =============================================================
+    let searchModal = null;
+    let searchInput = null;
+    let searchResults = null;
+    let allStationsForSearch = [];
+    let filteredStationsForSearch = [];
+    let selectedSearchIndex = -1;
+
+    function initSearch(stations, onSelect) {
+      searchModal = document.getElementById('search-modal');
+      searchInput = document.getElementById('search-input');
+      searchResults = document.getElementById('search-results');
+      if (!searchModal || !searchInput || !searchResults) return;
+      
+      allStationsForSearch = stations;
+      filteredStationsForSearch = [];
+      selectedSearchIndex = -1;
+
+      searchInput.addEventListener('input', handleSearchInput);
+      searchInput.addEventListener('keydown', onSearchKeydown);
+      
+      const backdrop = searchModal.querySelector('.search-backdrop');
+      if (backdrop) {
+        backdrop.addEventListener('click', () => closeSearch());
+      }
+      
+      searchResults.addEventListener('click', (e) => {
+        const item = e.target.closest('.search-result-item');
+        if (!item) return;
+        const index = parseInt(item.dataset.index, 10);
+        if (!isNaN(index) && index < filteredStationsForSearch.length) {
+          onSelect(filteredStationsForSearch[index]);
+          closeSearch();
+        }
+      });
+    }
+
+    function openSearch() {
+      if (!searchModal || !searchInput) return;
+      searchModal.style.display = 'flex';
+      searchInput.value = '';
+      searchInput.focus();
+      selectedSearchIndex = -1;
+      filteredStationsForSearch = allStationsForSearch.slice(0, 50);
+      renderSearchResults();
+    }
+
+    function closeSearch() {
+      if (!searchModal) return;
+      searchModal.style.display = 'none';
+      if (searchInput) searchInput.value = '';
+      selectedSearchIndex = -1;
+    }
+
+    function updateSearchStations(stations) {
+      allStationsForSearch = stations;
+      if (searchModal && searchModal.style.display === 'flex') {
+        handleSearchInput();
+      }
+    }
+
+    function handleSearchInput() {
+      if (!searchInput) return;
+      const query = searchInput.value.trim().toLowerCase();
+      if (!query) {
+        filteredStationsForSearch = allStationsForSearch.slice(0, 50);
+      } else {
+        filteredStationsForSearch = allStationsForSearch.filter(station => {
+          const nameMatch = station.name && station.name.toLowerCase().includes(query);
+          const countryMatch = station.country && station.country.toLowerCase().includes(query);
+          const tagsMatch = station.tags && station.tags.toLowerCase().includes(query);
+          const stateMatch = station.state && station.state.toLowerCase().includes(query);
+          return nameMatch || countryMatch || tagsMatch || stateMatch;
+        }).slice(0, 50);
+      }
+      selectedSearchIndex = -1;
+      renderSearchResults();
+    }
+
+    function renderSearchResults() {
+      if (!searchResults) return;
+      searchResults.innerHTML = '';
+      
+      for (let i = 0; i < filteredStationsForSearch.length; i++) {
+        const station = filteredStationsForSearch[i];
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.dataset.index = i;
+        if (i === selectedSearchIndex) item.classList.add('search-result-item--active');
+
+        const flag = getCountryFlagEmoji(station.countrycode || '');
+        const location = [station.state, station.country].filter(Boolean).join(', ');
+        const tagsText = station.tags ? station.tags.split(',').slice(0, 3).join(', ') : '';
+        
+        item.innerHTML = `
+          <span class="search-result-item__flag">${flag}</span>
+          <div class="search-result-item__info">
+            <div class="search-result-item__name">${escapeHtml(station.name || 'Unknown')}</div>
+            <div class="search-result-item__meta">${[location, tagsText].filter(Boolean).join(' · ')}</div>
+          </div>
+        `;
+        
+        searchResults.appendChild(item);
+      }
+      
+      if (filteredStationsForSearch.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'search-result-item';
+        empty.textContent = 'Nenhuma emissora encontrada';
+        empty.style.opacity = '0.5';
+        empty.style.cursor = 'default';
+        searchResults.appendChild(empty);
+      }
+    }
+
+    function onSearchKeydown(e) {
+      if (filteredStationsForSearch.length === 0) return;
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          selectedSearchIndex = Math.min(selectedSearchIndex + 1, filteredStationsForSearch.length - 1);
+          if (selectedSearchIndex === -1) selectedSearchIndex = 0;
+          updateSearchSelection();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          selectedSearchIndex = Math.max(selectedSearchIndex - 1, 0);
+          updateSearchSelection();
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (selectedSearchIndex >= 0 && selectedSearchIndex < filteredStationsForSearch.length) {
+            if (onStationClickCallback) onStationClickCallback(filteredStationsForSearch[selectedSearchIndex]);
+            closeSearch();
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          closeSearch();
+          break;
+      }
+    }
+
+    function updateSearchSelection() {
+      const items = searchResults.querySelectorAll('.search-result-item');
+      items.forEach((el, i) => {
+        el.classList.toggle('search-result-item--active', i === selectedSearchIndex);
+        if (i === selectedSearchIndex) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    }
+
+    function getCountryFlagEmoji(countryCode) {
+      if (!countryCode || countryCode.length !== 2) return '';
+      const code = countryCode.toUpperCase();
+      return String.fromCodePoint(code.charCodeAt(0) + 0x1F1A6, code.charCodeAt(1) + 0x1F1A6);
+    }
+
+    // =============================================================
+    // FILTERS UI
+    // =============================================================
+    let activeCountries = new Set();
+    let activeTags = new Set();
+    let activeBitrates = new Set();
+    let filterSidebar = null;
+    let brazilOnly = false;
+
+    function initFilters(stations, onChange) {
+      filterSidebar = document.getElementById('filter-sidebar');
+      if (!filterSidebar) return;
+      
+      renderFilterOptions(stations);
+      
+      document.getElementById('filter-countries')?.addEventListener('change', (e) => {
+        if (e.target.name === 'country') toggleFilter(activeCountries, e.target.value, e.target.checked);
+        onChange(getActiveFilters());
+      });
+      
+      document.getElementById('filter-tags')?.addEventListener('change', (e) => {
+        if (e.target.name === 'tag') toggleFilter(activeTags, e.target.value, e.target.checked);
+        onChange(getActiveFilters());
+      });
+      
+      document.getElementById('filter-bitrates')?.addEventListener('change', (e) => {
+        if (e.target.name === 'bitrate') toggleFilter(activeBitrates, e.target.value, e.target.checked);
+        onChange(getActiveFilters());
+      });
+      
+      document.getElementById('close-filters')?.addEventListener('click', closeFilters);
+    }
+
+    function toggleFilter(set, value, isChecked) {
+      if (isChecked) set.add(value);
+      else set.delete(value);
+    }
+
+    function openFilters() {
+      filterSidebar?.classList.add('filter-sidebar--open');
+    }
+
+    function closeFilters() {
+      filterSidebar?.classList.remove('filter-sidebar--open');
+    }
+
+    function getActiveFilters() {
+      return {
+        countries: Array.from(activeCountries),
+        tags: Array.from(activeTags),
+        bitrates: Array.from(activeBitrates),
+        brazilOnly: brazilOnly
+      };
+    }
+
+    function renderFilterOptions(stations) {
+      renderCountryFilters(stations);
+      renderTagFilters(stations);
+      renderBitrateFilters(stations);
+    }
+
+    function renderCountryFilters(stations) {
+      const container = document.getElementById('filter-countries');
+      if (!container) return;
+      const countries = getTopCountries(stations, 30);
+      container.innerHTML = countries.map(({ country, count }) => `
+        <label class="filter-item ${country === 'Brazil' || country === 'Brasil' ? 'filter-item--highlight' : ''}">
+          <input type="checkbox" name="country" value="${escapeHtml(country)}" ${activeCountries.has(country) ? 'checked' : ''}>
+          <span class="filter-item__name">${country === 'Brazil' ? '🇧🇷 ' : ''}${escapeHtml(country)}</span>
+          <span class="filter-item__count">${count}</span>
+        </label>
+      `).join('');
+    }
+
+    function renderTagFilters(stations) {
+      const container = document.getElementById('filter-tags');
+      if (!container) return;
+      const tags = getTopTags(stations, 30);
+      container.innerHTML = tags.map(({ tag, count }) => `
+        <label class="filter-item">
+          <input type="checkbox" name="tag" value="${escapeHtml(tag)}" ${activeTags.has(tag) ? 'checked' : ''}>
+          <span class="filter-item__name">${escapeHtml(tag)}</span>
+          <span class="filter-item__count">${count}</span>
+        </label>
+      `).join('');
+    }
+
+    function renderBitrateFilters(stations) {
+      const container = document.getElementById('filter-bitrates');
+      if (!container) return;
+      const buckets = getBitrateBuckets(stations);
+      const order = ['0-64', '64-128', '128-192', '192-320', '320+'];
+      container.innerHTML = order.map(bucket => `
+        <label class="filter-item">
+          <input type="checkbox" name="bitrate" value="${bucket}" ${activeBitrates.has(bucket) ? 'checked' : ''}>
+          <span class="filter-item__name">${bucket} kbps</span>
+          <span class="filter-item__count">${buckets[bucket] || 0}</span>
+        </label>
+      `).join('');
+    }
+
+    // =============================================================
+    // MAIN APP
+    // =============================================================
+    const gridEl = document.getElementById('station-grid');
+    const emptyStateEl = document.getElementById('empty-state');
+    const gridTitleEl = document.getElementById('grid-title');
+    const gridCountEl = document.getElementById('grid-count');
+    const playerStationEl = document.getElementById('player-station');
+    const playerMetaEl = document.getElementById('player-meta');
+    const btnPlay = document.getElementById('btn-play');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnFavorite = document.getElementById('btn-favorite');
+    const btnSleep = document.getElementById('btn-sleep');
+    const sleepMenu = document.getElementById('sleep-menu');
+    const volumeSlider = document.getElementById('volume');
+    const favoritesToggle = document.getElementById('favorites-toggle');
+    const brazilOnlyBtn = document.getElementById('brazil-only-btn');
+    const filtersToggleBtn = document.getElementById('filters-toggle');
+    const clearFiltersBtn = document.getElementById('clear-filters');
+
+    let allStations = [];
+    let currentStations = [];
+    let favoritesOnly = false;
+    let activeStationUuid = null;
+    let sleepTimerId = null;
+
+    function countryCodeToFlag(code) {
+      if (!code || code.length !== 2) return '';
+      const cc = code.toUpperCase();
+      return String.fromCodePoint(0x1F1E6 + cc.charCodeAt(0) - 65) +
+             String.fromCodePoint(0x1F1E6 + cc.charCodeAt(1) - 65);
+    }
+
+    function renderGrid(stations) {
+      if (!gridEl) return;
+      gridEl.innerHTML = '';
+      if (stations.length === 0) {
+        gridEl.style.display = 'none';
+        if (emptyStateEl) emptyStateEl.style.display = 'flex';
+        if (gridCountEl) gridCountEl.textContent = '0 emissoras';
+        return;
+      }
+      gridEl.style.display = 'grid';
+      if (emptyStateEl) emptyStateEl.style.display = 'none';
+      if (gridCountEl) gridCountEl.textContent = `${stations.length} emissora${stations.length !== 1 ? 's' : ''}`;
+
+      for (const station of stations) {
+        const card = document.createElement('div');
+        card.className = 'station-card';
+        if (station.stationuuid === activeStationUuid) card.classList.add('station-card--active');
+        card.dataset.uuid = station.stationuuid;
+        const flag = countryCodeToFlag(station.countrycode);
+        const tags = station.tags ? station.tags.split(',').map(t => t.trim()).filter(Boolean).slice(0, 3) : [];
+        const location = station.state ? `${station.state}, ${station.country}` : station.country;
+        
+        card.innerHTML = `
+          <span class="station-card__flag">${flag}</span>
+          <span class="station-card__name">${escapeHtml(station.name)}</span>
+          <div class="station-card__tags">${tags.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}</div>
+          <button class="station-card__play" title="Play">&#9654;</button>
+        `;
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.station-card__play')) e.stopPropagation();
+          onStationClick(station);
+        });
+        gridEl.appendChild(card);
+      }
+    }
+
+    function highlightCard(uuid) {
+      activeStationUuid = uuid;
+      if (!gridEl) return;
+      const cards = gridEl.querySelectorAll('.station-card');
+      cards.forEach(card => {
+        card.classList.toggle('station-card--active', card.dataset.uuid === uuid);
+      });
+    }
+
+    function updatePlayerBar(station) {
+      if (!station) return;
+      if (playerStationEl) playerStationEl.textContent = station.name || 'Unknown Station';
+      if (playerMetaEl) {
+        const parts = [];
+        if (station.state) parts.push(station.state);
+        if (station.country) parts.push(station.country);
+        if (station.bitrate) parts.push(`${station.bitrate} kbps`);
+        if (station.codec && station.codec !== 'UNKNOWN') parts.push(station.codec);
+        playerMetaEl.textContent = parts.join(' · ');
+      }
+      updateFavoriteBtnState();
+    }
+
+    function updatePlayBtnState() {
+      if (!btnPlay) return;
+      btnPlay.innerHTML = isPlayingNow() ? '&#9208;' : '&#9654;';
+    }
+
+    function updateFavoriteBtnState() {
+      if (!btnFavorite) return;
+      const station = getCurrentStation();
+      if (!station) {
+        btnFavorite.classList.remove('player-btn--active');
+        return;
+      }
+      if (isFavorite(station.stationuuid)) btnFavorite.classList.add('player-btn--active');
+      else btnFavorite.classList.remove('player-btn--active');
+    }
+
+    function updateFavoritesCount() {
+      const countEl = document.querySelector('.favorites-count');
+      if (countEl) countEl.textContent = getFavorites().size;
+    }
+
+    function onStationClick(station) {
+      if (!station) return;
+      playStation(station);
+      setLastPlayed(station);
+      updatePlayerBar(station);
+      updatePlayBtnState();
+      highlightCard(station.stationuuid);
+      highlightMapMarker(station.stationuuid);
+    }
+
+    function onFiltersChange() {
+      const filters = getActiveFilters();
+      filters.favoritesOnly = favoritesOnly;
+      filters.favoriteUuids = getFavorites();
+      filters.brazilOnly = brazilOnly;
+      currentStations = filterStations(allStations, filters);
+      renderGrid(currentStations);
+      updateMapMarkers(currentStations);
+      updateSearchStations(currentStations);
+      
+      if (gridTitleEl) {
+        if (brazilOnly) gridTitleEl.textContent = '🇧🇷 Rádios Brasileiras';
+        else if (favoritesOnly) gridTitleEl.textContent = '❤️ Favoritos';
+        else if (filters.countries.length || filters.tags.length || filters.bitrates.length) gridTitleEl.textContent = 'Filtrados';
+        else gridTitleEl.textContent = 'Todas as emissoras';
+      }
+      
+      const brazilCount = currentStations.filter(s => s.countrycode === 'BR').length;
+      if (gridCountEl && brazilCount > 0) {
+        gridCountEl.textContent = `${currentStations.length} emissoras (${brazilCount} 🇧🇷)`;
+      }
+    }
+
+    async function loadStations() {
+      if (!gridEl) return;
+      gridEl.style.display = 'none';
+      if (emptyStateEl) {
+        emptyStateEl.style.display = 'flex';
+        emptyStateEl.innerHTML = `
+          <div class="loading-spinner"></div>
+          <p>Carregando emissoras brasileiras e globais...</p>
+        `;
+      }
+      
+      try {
+        const stations = await fetchStations();
+        allStations = stations;
+        currentStations = stations;
+        renderGrid(stations);
+        initMap('map', stations, onStationClick);
+        initSearch(stations, onStationClick);
+        initFilters(stations, onFiltersChange);
+        
+        const lastPlayed = getLastPlayed();
+        if (lastPlayed) {
+          const found = stations.find(s => s.stationuuid === lastPlayed.stationuuid);
+          if (found) updatePlayerBar(found);
+        }
+        
+        const brazilCount = stations.filter(s => s.countrycode === 'BR').length;
+        showToast(`${stations.length} emissoras carregadas (${brazilCount} brasileiras 🇧🇷)`);
+      } catch (err) {
+        console.error('Failed to load stations:', err);
+        if (gridEl) gridEl.style.display = 'none';
+        if (emptyStateEl) {
+          emptyStateEl.style.display = 'flex';
+          emptyStateEl.innerHTML = `
+            <p>Falha ao carregar emissoras.</p>
+            <button class="retry-btn" id="retry-load">Tentar novamente</button>
+          `;
+          document.getElementById('retry-load')?.addEventListener('click', loadStations, { once: true });
+        }
+        showToast('Falha ao carregar emissoras', 'error');
+      }
+    }
+
+    function setupEvents() {
+      if (btnPlay) {
+        btnPlay.addEventListener('click', () => {
+          togglePlay();
+          updatePlayBtnState();
+        });
+      }
+      
+      if (btnPrev) {
+        btnPrev.addEventListener('click', () => {
+          playPrev(currentStations);
+          const station = getCurrentStation();
+          if (station) {
+            setLastPlayed(station);
+            updatePlayerBar(station);
+            highlightCard(station.stationuuid);
+            highlightMapMarker(station.stationuuid);
+          }
+        });
+      }
+      
+      if (btnNext) {
+        btnNext.addEventListener('click', () => {
+          playNext(currentStations);
+          const station = getCurrentStation();
+          if (station) {
+            setLastPlayed(station);
+            updatePlayerBar(station);
+            highlightCard(station.stationuuid);
+            highlightMapMarker(station.stationuuid);
+          }
+        });
+      }
+      
+      if (volumeSlider) {
+        volumeSlider.addEventListener('input', (e) => setVolume(e.target.value));
+        setVolume(volumeSlider.value);
+      }
+      
+      if (btnFavorite) {
+        btnFavorite.addEventListener('click', () => {
+          const station = getCurrentStation();
+          if (!station) return;
+          const isFav = toggleFavorite(station.stationuuid);
+          updateFavoriteBtnState();
+          updateFavoritesCount();
+          showToast(isFav ? 'Adicionado aos favoritos ❤️' : 'Removido dos favoritos');
+          if (favoritesOnly) onFiltersChange();
+        });
+      }
+      
+      if (btnSleep && sleepMenu) {
+        btnSleep.addEventListener('click', (e) => {
+          e.stopPropagation();
+          sleepMenu.classList.toggle('sleep-menu--open');
+        });
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.sleep-dropdown') && sleepMenu.classList.contains('sleep-menu--open')) {
+            sleepMenu.classList.remove('sleep-menu--open');
+          }
+        });
+        sleepMenu.querySelectorAll('button[data-min]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const mins = parseInt(btn.dataset.min, 10);
+            if (sleepTimerId) { clearTimeout(sleepTimerId); sleepTimerId = null; }
+            if (mins > 0) {
+              sleepTimerId = setTimeout(() => {
+                pause();
+                updatePlayBtnState();
+                showToast(`Timer de sono — pausado`);
+                sleepTimerId = null;
+              }, mins * 60000);
+              showToast(`Timer definido para ${mins} min`);
+            } else {
+              showToast('Timer desligado');
+            }
+            sleepMenu.classList.remove('sleep-menu--open');
+          });
+        });
+      }
+      
+      if (favoritesToggle) {
+        favoritesToggle.addEventListener('click', () => {
+          favoritesOnly = !favoritesOnly;
+          favoritesToggle.classList.toggle('header-btn--active', favoritesOnly);
+          if (favoritesOnly && brazilOnly) {
+            brazilOnly = false;
+            brazilOnlyBtn?.classList.remove('header-btn--active');
+          }
+          onFiltersChange();
+        });
+      }
+      
+      if (brazilOnlyBtn) {
+        brazilOnlyBtn.addEventListener('click', () => {
+          brazilOnly = !brazilOnly;
+          brazilOnlyBtn.classList.toggle('header-btn--active', brazilOnly);
+          if (brazilOnly && favoritesOnly) {
+            favoritesOnly = false;
+            favoritesToggle?.classList.remove('header-btn--active');
+          }
+          onFiltersChange();
+        });
+      }
+      
+      if (filtersToggleBtn) {
+        filtersToggleBtn.addEventListener('click', () => openFilters());
+      }
+      
+      if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+          favoritesOnly = false;
+          brazilOnly = false;
+          if (favoritesToggle) favoritesToggle.classList.remove('header-btn--active');
+          if (brazilOnlyBtn) brazilOnlyBtn.classList.remove('header-btn--active');
+          activeCountries.clear();
+          activeTags.clear();
+          activeBitrates.clear();
+          if (allStations.length > 0) renderFilterOptions(allStations);
+          onFiltersChange();
+        });
+      }
+      
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          openSearch();
+        }
+        if (e.key === 'Escape') {
+          closeSearch();
+          closeFilters();
+        }
+      });
+    }
+
+    function startup() {
+      initPlayer();
+      updateFavoritesCount();
+      setupEvents();
+      loadStations();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startup);
+    } else {
+      startup();
+    }
+  </script>
+</body>
+</html>
