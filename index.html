@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Radio // Global + Universitárias BR</title>
+  <title>Radio // Global + Brasil</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,9 +14,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
   <style>
-    /* ========================================
-       Radio // Global - Styles (style.css)
-       ======================================== */
     *,
     *::before,
     *::after {
@@ -44,7 +41,6 @@
       cursor: pointer;
     }
 
-    /* Toast */
     #toast-container {
       position: fixed;
       top: 16px;
@@ -76,8 +72,10 @@
     .toast--error {
       background: #c00;
     }
+    .toast--success {
+      background: #2d8a4e;
+    }
 
-    /* Header */
     .header {
       position: sticky;
       top: 0;
@@ -166,7 +164,6 @@
       line-height: 1;
     }
 
-    /* Main Layout */
     .main {
       display: flex;
       flex: 1;
@@ -193,7 +190,6 @@
       z-index: 1;
     }
 
-    /* Grid Header */
     .grid-header {
       display: flex;
       align-items: center;
@@ -212,7 +208,6 @@
       color: #888;
     }
 
-    /* Station Grid */
     .station-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -222,7 +217,6 @@
       flex: 1;
     }
 
-    /* Station Card */
     .station-card {
       display: flex;
       flex-direction: column;
@@ -305,7 +299,6 @@
       border-color: #111;
     }
 
-    /* Empty State */
     .empty-state {
       display: flex;
       flex-direction: column;
@@ -336,17 +329,6 @@
       border-color: #ccc;
     }
 
-    /* Loading State */
-    .loading-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      padding: 60px 20px;
-      flex: 1;
-      color: #888;
-    }
     .loading-spinner {
       width: 24px;
       height: 24px;
@@ -361,7 +343,6 @@
       }
     }
 
-    /* Player Bar */
     .player-bar {
       position: fixed;
       bottom: 0;
@@ -436,7 +417,6 @@
       gap: 4px;
     }
 
-    /* Volume Slider */
     .volume-slider {
       -webkit-appearance: none;
       appearance: none;
@@ -466,7 +446,6 @@
       border: none;
     }
 
-    /* Sleep Dropdown */
     .sleep-dropdown {
       position: relative;
     }
@@ -502,7 +481,6 @@
       background: #f5f5f5;
     }
 
-    /* Search Modal */
     .search-modal {
       position: fixed;
       inset: 0;
@@ -556,29 +534,8 @@
       cursor: pointer;
       transition: background 150ms ease;
     }
-    .search-result-item:hover,
-    .search-result-item--active {
+    .search-result-item:hover {
       background: #f5f5f5;
-    }
-    .search-result-item__flag {
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-    .search-result-item__info {
-      flex: 1;
-      min-width: 0;
-    }
-    .search-result-item__name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #111;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .search-result-item__meta {
-      font-size: 12px;
-      color: #888;
     }
     .search-footer {
       display: flex;
@@ -595,7 +552,6 @@
       gap: 4px;
     }
 
-    /* Filter Sidebar */
     .filter-sidebar {
       position: fixed;
       top: 0;
@@ -659,11 +615,6 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .filter-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
     .filter-item {
       display: flex;
       align-items: center;
@@ -677,53 +628,14 @@
     .filter-item:hover {
       background: #f5f5f5;
     }
-    .filter-item--active {
-      background: #f5f5f5;
+    .filter-item input[type="checkbox"] {
+      margin-right: 8px;
     }
-    .filter-item--active .filter-item__check {
-      background: #111;
-      border-color: #111;
-    }
-    .filter-item--active .filter-item__check::after {
-      content: '';
-      display: block;
-      width: 4px;
-      height: 7px;
-      border: solid #fff;
-      border-width: 0 1.5px 1.5px 0;
-      transform: rotate(45deg);
-      margin-top: -1px;
-    }
-    .filter-item__label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-    }
-    .filter-item__name {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .filter-item__count {
+    .filter-count {
       font-size: 12px;
       color: #888;
-      flex-shrink: 0;
-    }
-    .filter-item__check {
-      width: 16px;
-      height: 16px;
-      border: 1.5px solid #ddd;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background 150ms ease, border-color 150ms ease;
     }
 
-    /* Leaflet Overrides */
     .leaflet-container {
       font-family: 'Inter', system-ui, sans-serif;
     }
@@ -752,23 +664,7 @@
       font-family: 'Inter', system-ui, sans-serif;
       font-size: 13px;
     }
-    .popup-station-name {
-      font-weight: 600;
-      color: #111;
-      margin-bottom: 4px;
-    }
-    .popup-station-meta {
-      color: #888;
-      font-size: 12px;
-    }
-    .popup-station-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 8px;
-    }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .main {
         flex-direction: column;
@@ -796,28 +692,15 @@
       .player-info {
         width: 100%;
         flex: none;
-        order: 1;
-      }
-      .player-controls {
-        order: 2;
-      }
-      .player-extras {
-        order: 3;
-        margin-left: auto;
       }
       .filter-sidebar {
         width: 100%;
-      }
-      .search-container {
-        max-width: calc(100vw - 20px);
-        margin: 0 10px;
       }
       .kbd-hint {
         display: none;
       }
     }
 
-    /* Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -832,7 +715,6 @@
       background: #bbb;
     }
 
-    /* Retry button */
     .retry-btn {
       padding: 8px 16px;
       border: 1px solid #111;
@@ -842,6 +724,7 @@
       font-size: 13px;
       font-weight: 500;
       transition: opacity 150ms ease;
+      cursor: pointer;
     }
     .retry-btn:hover {
       opacity: 0.85;
@@ -851,10 +734,8 @@
 
 <body>
 
-  <!-- Toast Container -->
   <div id="toast-container"></div>
 
-  <!-- Header -->
   <header class="header">
     <div class="header-left">
       <a href="/" class="logo">RADIO //</a>
@@ -869,7 +750,6 @@
     </div>
   </header>
 
-  <!-- Main -->
   <main class="main">
     <section class="panel panel--grid" id="grid-panel">
       <div class="grid-header">
@@ -888,7 +768,6 @@
     </section>
   </main>
 
-  <!-- Player Bar -->
   <footer class="player-bar" id="player-bar">
     <div class="player-info">
       <div class="player-station" id="player-station">Selecione uma emissora</div>
@@ -915,7 +794,6 @@
     </div>
   </footer>
 
-  <!-- Search Modal -->
   <div class="search-modal" id="search-modal" style="display:none;">
     <div class="search-backdrop"></div>
     <div class="search-container">
@@ -929,7 +807,6 @@
     </div>
   </div>
 
-  <!-- Filter Sidebar -->
   <aside class="filter-sidebar" id="filter-sidebar">
     <div class="filter-header">
       <h3>Filtros</h3>
@@ -951,12 +828,8 @@
     </div>
   </aside>
 
-  <!-- Audio Element -->
   <audio id="audio-player" crossorigin="anonymous"></audio>
 
-  <!-- ============================================================ -->
-  <!-- Import Map para Leaflet e MarkerCluster                       -->
-  <!-- ============================================================ -->
   <script type="importmap">
     {
       "imports": {
@@ -966,44 +839,31 @@
     }
   </script>
 
-  <!-- ============================================================ -->
-  <!-- Módulo principal – integração de todos os arquivos JS         -->
-  <!-- ============================================================ -->
   <script type="module">
-    // -------- Import Leaflet e MarkerCluster --------
     import L from 'leaflet';
     import 'leaflet.markercluster';
 
-    // =============================================================
-    // 1. TOAST (toast.js)
-    // =============================================================
+    // ============ TOAST ============
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       if (!container) return;
       const toast = document.createElement('div');
       toast.className = 'toast';
       if (type === 'error') toast.classList.add('toast--error');
+      if (type === 'success') toast.classList.add('toast--success');
       toast.textContent = message;
       container.appendChild(toast);
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          toast.classList.add('toast--visible');
-        });
+        requestAnimationFrame(() => toast.classList.add('toast--visible'));
       });
       setTimeout(() => {
         toast.classList.remove('toast--visible');
-        toast.addEventListener('transitionend', () => {
-          if (toast.parentNode) toast.parentNode.removeChild(toast);
-        }, { once: true });
-        setTimeout(() => {
-          if (toast.parentNode) toast.parentNode.removeChild(toast);
-        }, 400);
+        toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+        setTimeout(() => toast.remove(), 400);
       }, 3000);
     }
 
-    // =============================================================
-    // 2. STORAGE (storage.js)
-    // =============================================================
+    // ============ STORAGE ============
     const FAV_KEY = 'radio.favorites';
     const LAST_KEY = 'radio.lastPlayed';
 
@@ -1012,231 +872,142 @@
         const raw = localStorage.getItem(FAV_KEY);
         if (!raw) return new Set();
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return new Set(parsed);
-        return new Set();
+        return Array.isArray(parsed) ? new Set(parsed) : new Set();
       } catch { return new Set(); }
     }
     function saveFavorites(favs) {
       localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(favs)));
     }
-    function addFavorite(uuid) {
-      const favs = getFavorites();
-      favs.add(uuid);
-      saveFavorites(favs);
-    }
-    function removeFavorite(uuid) {
-      const favs = getFavorites();
-      favs.delete(uuid);
-      saveFavorites(favs);
-    }
     function toggleFavorite(uuid) {
       const favs = getFavorites();
-      if (favs.has(uuid)) {
-        favs.delete(uuid);
-        saveFavorites(favs);
-        return false;
-      } else {
-        favs.add(uuid);
-        saveFavorites(favs);
-        return true;
-      }
+      if (favs.has(uuid)) { favs.delete(uuid); saveFavorites(favs); return false; }
+      else { favs.add(uuid); saveFavorites(favs); return true; }
     }
-    function isFavorite(uuid) {
-      return getFavorites().has(uuid);
-    }
+    function isFavorite(uuid) { return getFavorites().has(uuid); }
     function getLastPlayed() {
-      try {
-        const raw = localStorage.getItem(LAST_KEY);
-        if (!raw) return null;
-        return JSON.parse(raw);
-      } catch { return null; }
+      try { return JSON.parse(localStorage.getItem(LAST_KEY)); } catch { return null; }
     }
     function setLastPlayed(station) {
-      try {
-        localStorage.setItem(LAST_KEY, JSON.stringify(station));
-      } catch { /* ignore */ }
+      try { localStorage.setItem(LAST_KEY, JSON.stringify(station)); } catch {}
     }
 
-    // =============================================================
-    // 3. API (api.js) – CORRIGIDA: globais + universitárias BR
-    //    Se a busca extra falhar, o app funciona normalmente.
-    // =============================================================
+    // ============ API - CARREGA MAIS RÁDIOS BRASILEIRAS ============
     async function fetchStations() {
-      const globalURL = 'https://de1.api.radio-browser.info/json/stations/topclick/500';
       const headers = { 'User-Agent': 'RadioGlobal/1.0' };
-
-      // ----- PASSO 1: Globais (obrigatórias) -----
-      const globalResponse = await fetch(globalURL, { headers });
-      if (!globalResponse.ok) {
-        throw new Error(`HTTP ${globalResponse.status}: Falha ao buscar estações globais`);
-      }
-      const globalData = await globalResponse.json();
-      if (!Array.isArray(globalData)) {
-        throw new Error('Resposta inválida (globais)');
-      }
-
-      // ----- PASSO 2: Universitárias do Brasil (opcional) -----
-      let uniData = [];
+      
+      // 1. Globais (top 500)
+      console.log('🔄 Carregando rádios globais...');
+      const globalResp = await fetch('https://de1.api.radio-browser.info/json/stations/topclick/500', { headers });
+      if (!globalResp.ok) throw new Error(`HTTP ${globalResp.status}: Globais`);
+      const globalData = await globalResp.json();
+      console.log(`✅ Globais: ${globalData.length}`);
+      
+      // 2. Brasileiras - busca por páginas para pegar MUITAS
+      console.log('🔄 Carregando rádios brasileiras...');
+      let todasBR = [];
+      
+      // Busca por nome (as mais populares primeiro)
       try {
-        const brasilURL = 'https://de1.api.radio-browser.info/json/stations/bycountry/brazil?hidebroken=true&limit=1000';
-        const uniResponse = await fetch(brasilURL, { headers });
-        if (uniResponse.ok) {
-          const uniJson = await uniResponse.json();
-          if (Array.isArray(uniJson)) {
-            // Filtra apenas as que contêm "universit" no nome ou nas tags
-            uniData = uniJson.filter(station => {
-              const nome = (station.name || '').toLowerCase();
-              const tags = (station.tags || '').toLowerCase();
-              return nome.includes('universit') || tags.includes('universit');
-            });
+        const resp = await fetch('https://de1.api.radio-browser.info/json/stations/bycountry/brazil?hidebroken=true&limit=500', { headers });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (Array.isArray(data)) {
+            todasBR = [...todasBR, ...data];
+            console.log(`✅ bycountry/brazil: ${data.length}`);
           }
         }
-      } catch (err) {
-        console.warn('Não foi possível carregar as rádios universitárias:', err);
-        showToast('Rádios universitárias não carregadas, mas as globais estão disponíveis.', 'info');
-      }
-
-      // ----- PASSO 3: Juntar e remover duplicatas -----
-      const todas = [...globalData, ...uniData];
-      const unicas = [];
-      const visto = new Set();
-      for (const station of todas) {
-        if (station.stationuuid && !visto.has(station.stationuuid)) {
-          visto.add(station.stationuuid);
-          unicas.push(station);
-        }
-      }
-
-      // ----- PASSO 4: Filtro técnico (aceita http e https) -----
-      const filtradas = unicas.filter(station => {
-        const url = station.url_resolved || '';
-        const hasValidURL = url.startsWith('http://') || url.startsWith('https://');
-        return hasValidURL &&
-               station.name &&
-               station.name.trim().length > 0 &&
-               station.codec !== 'UNKNOWN';
-      });
-
-      return filtradas;
-    }
-
-    // =============================================================
-    // (Mantidas as funções auxiliares originais)
-    // =============================================================
-    function getTopCountries(stations, limit = 30) {
-      const counts = {};
-      for (const s of stations) {
-        const country = s.country && s.country.trim() ? s.country.trim() : 'Unknown';
-        counts[country] = (counts[country] || 0) + 1;
-      }
-      return Object.entries(counts)
-        .map(([country, count]) => ({ country, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, limit);
-    }
-
-    function getTopTags(stations, limit = 30) {
-      const counts = {};
-      for (const s of stations) {
-        if (s.tags) {
-          const tagList = s.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
-          const seen = new Set();
-          for (const tag of tagList) {
-            if (!seen.has(tag)) {
-              seen.add(tag);
-              counts[tag] = (counts[tag] || 0) + 1;
+      } catch(e) { console.warn('Erro bycountry:', e); }
+      
+      // Busca adicional por estados brasileiros para pegar mais
+      const estados = ['sao-paulo', 'rio-de-janeiro', 'minas-gerais', 'bahia', 'parana', 'rio-grande-do-sul', 'pernambuco', 'ceara', 'para', 'santa-catarina', 'goias', 'maranhao', 'amazonas', 'paraiba', 'espirito-santo', 'rio-grande-do-norte', 'alagoas', 'piaui', 'distrito-federal', 'mato-grosso', 'mato-grosso-do-sul', 'sergipe', 'rondonia', 'tocantins', 'acre', 'amapa', 'roraima'];
+      
+      for (const estado of estados) {
+        try {
+          const resp = await fetch(`https://de1.api.radio-browser.info/json/stations/bystate/${estado}/brazil?hidebroken=true&limit=100`, { headers });
+          if (resp.ok) {
+            const data = await resp.json();
+            if (Array.isArray(data) && data.length > 0) {
+              todasBR = [...todasBR, ...data];
+              console.log(`✅ ${estado}: ${data.length}`);
             }
           }
+          await new Promise(r => setTimeout(r, 100)); // Respeitar rate limit
+        } catch(e) {}
+      }
+      
+      console.log(`✅ Total BR antes de deduplicar: ${todasBR.length}`);
+      
+      // Remove duplicatas
+      const brUnicas = [];
+      const brVistas = new Set();
+      for (const s of todasBR) {
+        if (s.stationuuid && !brVistas.has(s.stationuuid)) {
+          brVistas.add(s.stationuuid);
+          brUnicas.push(s);
         }
       }
-      return Object.entries(counts)
-        .map(([tag, count]) => ({ tag, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, limit);
-    }
-
-    function getBitrateBuckets(stations) {
-      const buckets = {
-        '0-64': 0,
-        '64-128': 0,
-        '128-192': 0,
-        '192-320': 0,
-        '320+': 0
-      };
-      for (const s of stations) {
-        const bitrate = parseInt(s.bitrate, 10) || 0;
-        if (bitrate <= 64) buckets['0-64']++;
-        else if (bitrate <= 128) buckets['64-128']++;
-        else if (bitrate <= 192) buckets['128-192']++;
-        else if (bitrate <= 320) buckets['192-320']++;
-        else buckets['320+']++;
+      console.log(`✅ Brasileiras únicas: ${brUnicas.length}`);
+      
+      // 3. Junta globais + brasileiras (remove duplicatas)
+      const todas = [...globalData, ...brUnicas];
+      const todasUnicas = [];
+      const todasVistas = new Set();
+      for (const s of todas) {
+        if (s.stationuuid && !todasVistas.has(s.stationuuid)) {
+          todasVistas.add(s.stationuuid);
+          todasUnicas.push(s);
+        }
       }
-      return buckets;
+      
+      // 4. Filtro técnico
+      const filtradas = todasUnicas.filter(s => {
+        const url = s.url_resolved || '';
+        return (url.startsWith('http://') || url.startsWith('https://')) &&
+               s.name && s.name.trim().length > 0;
+      });
+      
+      console.log(`🎉 Total final: ${filtradas.length} (${globalData.length} globais + ${brUnicas.length} BR)`);
+      return { stations: filtradas, brCount: brUnicas.length, globalCount: globalData.length };
     }
 
-    function bitrateInBucket(bitrate, bucket) {
-      const b = parseInt(bitrate, 10) || 0;
-      switch (bucket) {
-        case '0-64': return b <= 64;
-        case '64-128': return b > 64 && b <= 128;
-        case '128-192': return b > 128 && b <= 192;
-        case '192-320': return b > 192 && b <= 320;
-        case '320+': return b > 320;
-        default: return false;
-      }
-    }
-
+    // ============ FILTROS ============
     function filterStations(stations, filters) {
-      const {
-        query = '',
-        countries = [],
-        tags = [],
-        bitrates = [],
-        favoritesOnly = false,
-        favoriteUuids = new Set()
-      } = filters;
-      const queryLower = query.toLowerCase().trim();
+      const { query = '', countries = [], tags = [], bitrates = [], favoritesOnly = false, favoriteUuids = new Set() } = filters;
+      const q = query.toLowerCase().trim();
       return stations.filter(s => {
         if (favoritesOnly && !favoriteUuids.has(s.stationuuid)) return false;
-        if (countries.length > 0) {
-          const stationCountry = s.country && s.country.trim() ? s.country.trim() : 'Unknown';
-          if (!countries.includes(stationCountry)) return false;
-        }
+        if (countries.length > 0 && !countries.includes(s.country || 'Unknown')) return false;
         if (tags.length > 0) {
-          const stationTags = s.tags ? s.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) : [];
-          const hasTag = tags.some(tag => stationTags.includes(tag));
-          if (!hasTag) return false;
+          const sTags = (s.tags || '').toLowerCase().split(',').map(t => t.trim()).filter(Boolean);
+          if (!tags.some(t => sTags.includes(t.toLowerCase()))) return false;
         }
         if (bitrates.length > 0) {
-          const matches = bitrates.some(bucket => bitrateInBucket(s.bitrate, bucket));
-          if (!matches) return false;
+          const br = parseInt(s.bitrate, 10) || 0;
+          const match = bitrates.some(b => {
+            if (b === '0-64 kbps') return br <= 64;
+            if (b === '64-128 kbps') return br > 64 && br <= 128;
+            if (b === '128-192 kbps') return br > 128 && br <= 192;
+            if (b === '192-320 kbps') return br > 192 && br <= 320;
+            if (b === '320+ kbps') return br > 320;
+            return false;
+          });
+          if (!match) return false;
         }
-        if (queryLower) {
-          const nameMatch = s.name && s.name.toLowerCase().includes(queryLower);
-          const countryMatch = s.country && s.country.toLowerCase().includes(queryLower);
-          const tagMatch = s.tags && s.tags.toLowerCase().includes(queryLower);
-          if (!nameMatch && !countryMatch && !tagMatch) return false;
+        if (q) {
+          return (s.name || '').toLowerCase().includes(q) ||
+                 (s.country || '').toLowerCase().includes(q) ||
+                 (s.tags || '').toLowerCase().includes(q);
         }
         return true;
       });
     }
 
-    // =============================================================
-    // 4. MAP (map.js)
-    // =============================================================
-    let map = null;
-    let markerClusterGroup = null;
-    let markersMap = new Map();
-    let onStationClickCallback = null;
+    // ============ MAPA ============
+    let map, markerClusterGroup, markersMap = new Map(), onStationClickCb;
 
-    function initMap(containerId, stations, onStationClick) {
-      onStationClickCallback = onStationClick;
-      map = L.map(containerId, {
-        center: [20, 0],
-        zoom: 2,
-        zoomControl: true,
-        attributionControl: true
-      });
+    function initMap(id, stations, cb) {
+      onStationClickCb = cb;
+      map = L.map(id, { center: [-15, -50], zoom: 4, zoomControl: true });
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap &copy; CARTO',
         subdomains: 'abcd',
@@ -1246,390 +1017,178 @@
         spiderfyOnMaxZoom: true,
         showCoverageOnHover: false,
         zoomToBoundsOnClick: true,
-        maxClusterRadius: 60,
-        disableClusteringAtZoom: null
+        maxClusterRadius: 60
       });
       map.addLayer(markerClusterGroup);
       updateMapMarkers(stations);
-      return { map, markersLayer: markerClusterGroup };
     }
 
     function updateMapMarkers(stations) {
       if (!markerClusterGroup) return;
       markerClusterGroup.clearLayers();
       markersMap.clear();
-      for (const station of stations) {
-        const lat = parseFloat(station.geo_lat);
-        const lng = parseFloat(station.geo_long);
+      for (const s of stations) {
+        const lat = parseFloat(s.geo_lat), lng = parseFloat(s.geo_long);
         if (!lat || !lng || isNaN(lat) || isNaN(lng)) continue;
         const marker = L.circleMarker([lat, lng], {
-          radius: 6,
-          color: '#111',
-          weight: 1.5,
-          fillColor: '#111',
-          fillOpacity: 0.7
+          radius: 6, color: '#111', weight: 1.5, fillColor: '#111', fillOpacity: 0.7
         });
-        const popupContent = `<strong>${escapeHtml(station.name)}</strong><br>${escapeHtml(station.country || '')}`;
-        marker.bindPopup(popupContent);
-        marker.on('click', () => {
-          if (onStationClickCallback) onStationClickCallback(station);
-        });
+        marker.bindPopup(`<strong>${escHtml(s.name)}</strong><br>${escHtml(s.country || '')}`);
+        marker.on('click', () => onStationClickCb?.(s));
         markerClusterGroup.addLayer(marker);
-        markersMap.set(station.stationuuid, marker);
+        markersMap.set(s.stationuuid, marker);
       }
     }
 
-    function highlightMapMarker(stationUuid) {
-      const marker = markersMap.get(stationUuid);
-      if (!marker || !map) return;
-      map.panTo(marker.getLatLng(), { animate: true, duration: 0.5 });
-      marker.openPopup();
+    function highlightMapMarker(uuid) {
+      const m = markersMap.get(uuid);
+      if (m && map) { map.panTo(m.getLatLng(), { animate: true, duration: 0.5 }); m.openPopup(); }
     }
 
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function escHtml(t) {
+      if (!t) return '';
+      const d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
     }
 
-    // =============================================================
-    // 5. PLAYER (player.js)
-    // =============================================================
-    let audio = null;
-    let currentStation = null;
-    let isPlaying = false;
-    let onErrorCallback = null;
-    let onEndedCallback = null;
+    // ============ PLAYER ============
+    let audio, currentStation, isPlaying = false, onErrCb, onEndCb;
 
-    function initPlayer(errorCb, endedCb) {
+    function initPlayer(errCb, endCb) {
       audio = document.getElementById('audio-player');
-      if (!audio) {
-        console.error('Audio element not found');
-        return;
-      }
-      onErrorCallback = errorCb || null;
-      onEndedCallback = endedCb || null;
-      audio.addEventListener('error', () => {
-        isPlaying = false;
-        if (onErrorCallback) onErrorCallback();
-      });
-      audio.addEventListener('ended', () => {
-        isPlaying = false;
-        if (onEndedCallback) onEndedCallback();
-      });
+      if (!audio) return;
+      onErrCb = errCb; onEndCb = endCb;
+      audio.addEventListener('error', () => { isPlaying = false; onErrCb?.(); });
+      audio.addEventListener('ended', () => { isPlaying = false; onEndCb?.(); });
       audio.addEventListener('playing', () => { isPlaying = true; });
       audio.addEventListener('pause', () => { isPlaying = false; });
     }
 
-    function playStation(station) {
-      if (!audio || !station || !station.url_resolved) return;
-      if (currentStation && currentStation.stationuuid === station.stationuuid) {
-        if (audio.paused) {
-          audio.play().catch(() => {
-            isPlaying = false;
-            if (onErrorCallback) onErrorCallback();
-          });
-        }
+    function playStation(s) {
+      if (!audio || !s?.url_resolved) return;
+      if (currentStation?.stationuuid === s.stationuuid) {
+        if (audio.paused) audio.play().catch(() => { isPlaying = false; onErrCb?.(); });
         return;
       }
-      currentStation = station;
-      audio.src = station.url_resolved;
+      currentStation = s;
+      audio.src = s.url_resolved;
       audio.load();
-      const playPromise = audio.play();
-      if (playPromise) {
-        playPromise.catch(() => {
-          isPlaying = false;
-          if (onErrorCallback) onErrorCallback();
-        });
-      }
+      audio.play().catch(() => { isPlaying = false; onErrCb?.(); });
       isPlaying = true;
     }
 
     function togglePlay() {
       if (!audio) return;
-      if (audio.paused) {
-        const playPromise = audio.play();
-        if (playPromise) {
-          playPromise.catch(() => {
-            isPlaying = false;
-            if (onErrorCallback) onErrorCallback();
-          });
-        }
-        isPlaying = true;
-      } else {
-        audio.pause();
-        isPlaying = false;
-      }
+      if (audio.paused) { audio.play().catch(() => { isPlaying = false; }); isPlaying = true; }
+      else { audio.pause(); isPlaying = false; }
     }
-
-    function pause() {
-      if (!audio) return;
-      audio.pause();
-      isPlaying = false;
-    }
-
-    function setVolume(value) {
-      if (!audio) return;
-      const vol = parseFloat(value);
-      if (!isNaN(vol)) audio.volume = Math.max(0, Math.min(1, vol));
-    }
-
+    function pause() { audio?.pause(); isPlaying = false; }
+    function setVolume(v) { if (audio) audio.volume = Math.max(0, Math.min(1, parseFloat(v) || 0.8)); }
     function getCurrentStation() { return currentStation; }
-
     function isPlayingNow() { return isPlaying; }
 
     function playNext(stations) {
-      if (!stations || stations.length === 0) return;
-      if (!currentStation) {
-        playStation(stations[0]);
-        return;
-      }
+      if (!stations?.length || !currentStation) return;
       const idx = stations.findIndex(s => s.stationuuid === currentStation.stationuuid);
-      const nextIdx = idx >= 0 ? (idx + 1) % stations.length : 0;
-      playStation(stations[nextIdx]);
+      playStation(stations[idx >= 0 ? (idx + 1) % stations.length : 0]);
     }
-
     function playPrev(stations) {
-      if (!stations || stations.length === 0) return;
-      if (!currentStation) {
-        playStation(stations[0]);
-        return;
-      }
+      if (!stations?.length || !currentStation) return;
       const idx = stations.findIndex(s => s.stationuuid === currentStation.stationuuid);
-      const prevIdx = idx >= 0 ? (idx - 1 + stations.length) % stations.length : 0;
-      playStation(stations[prevIdx]);
+      playStation(stations[idx >= 0 ? (idx - 1 + stations.length) % stations.length : 0]);
     }
 
-    // =============================================================
-    // 6. SEARCH (search.js)
-    // =============================================================
-    let searchModal = null;
-    let searchInput = null;
-    let searchResults = null;
-    let allStationsForSearch = [];
-    let filteredStationsForSearch = [];
-    let selectedSearchIndex = -1;
-    let onSearchSelectCallback = null;
-    let backdropEl = null;
+    // ============ SEARCH ============
+    let searchModal, searchInput, searchResults, allForSearch = [], filteredSearch = [], searchIdx = -1, onSearchSelect;
 
     function initSearch(stations, onSelect) {
       searchModal = document.getElementById('search-modal');
       searchInput = document.getElementById('search-input');
       searchResults = document.getElementById('search-results');
-      if (!searchModal || !searchInput || !searchResults) {
-        console.warn('Search: required DOM elements not found');
-        return;
-      }
-      onSearchSelectCallback = onSelect;
-      allStationsForSearch = stations;
-      filteredStationsForSearch = [];
-      selectedSearchIndex = -1;
-      backdropEl = searchModal.querySelector('.search-backdrop');
-
-      searchInput.addEventListener('input', handleSearchInput);
-      searchInput.addEventListener('keydown', onSearchKeydown);
-      if (backdropEl) {
-        backdropEl.addEventListener('click', (e) => {
-          if (e.target === backdropEl) closeSearch();
-        });
-      }
-      searchResults.addEventListener('click', onSearchResultClick);
+      if (!searchModal) return;
+      onSearchSelect = onSelect;
+      allForSearch = stations;
+      
+      searchInput.addEventListener('input', () => {
+        const q = searchInput.value.trim().toLowerCase();
+        filteredSearch = !q ? allForSearch.slice(0, 50) : allForSearch.filter(s =>
+          (s.name || '').toLowerCase().includes(q) || (s.country || '').toLowerCase().includes(q) || (s.tags || '').toLowerCase().includes(q)
+        ).slice(0, 50);
+        searchIdx = -1;
+        renderSearchResults();
+      });
+      
+      searchInput.addEventListener('keydown', e => {
+        if (!filteredSearch.length) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); searchIdx = Math.min(searchIdx + 1, filteredSearch.length - 1); renderSearchResults(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); searchIdx = Math.max(searchIdx - 1, 0); renderSearchResults(); }
+        else if (e.key === 'Enter') { e.preventDefault(); if (searchIdx >= 0) selectSearch(searchIdx); }
+        else if (e.key === 'Escape') closeSearch();
+      });
+      
+      searchResults.addEventListener('click', e => {
+        const item = e.target.closest('.search-result-item');
+        if (item) selectSearch(parseInt(item.dataset.index));
+      });
+      
+      document.querySelector('.search-backdrop')?.addEventListener('click', closeSearch);
     }
 
     function openSearch() {
-      if (!searchModal || !searchInput) return;
+      if (!searchModal) return;
       searchModal.style.display = 'flex';
       searchInput.value = '';
       searchInput.focus();
-      selectedSearchIndex = -1;
-      filteredStationsForSearch = allStationsForSearch.slice(0, 50);
+      searchIdx = -1;
+      filteredSearch = allForSearch.slice(0, 50);
       renderSearchResults();
     }
 
-    function closeSearch() {
-      if (!searchModal) return;
-      searchModal.style.display = 'none';
-      if (searchInput) searchInput.value = '';
-      selectedSearchIndex = -1;
-    }
-
-    function updateSearchStations(stations) {
-      allStationsForSearch = stations;
-      if (searchModal && searchModal.style.display === 'flex') {
-        handleSearchInput();
-      }
-    }
-
-    function handleSearchInput() {
-      if (!searchInput) return;
-      const query = searchInput.value.trim().toLowerCase();
-      if (!query) {
-        filteredStationsForSearch = allStationsForSearch.slice(0, 50);
-      } else {
-        filteredStationsForSearch = allStationsForSearch.filter(station => {
-          const nameMatch = station.name && station.name.toLowerCase().includes(query);
-          const countryMatch = station.country && station.country.toLowerCase().includes(query);
-          const tagsMatch = station.tags && station.tags.toLowerCase().includes(query);
-          return nameMatch || countryMatch || tagsMatch;
-        }).slice(0, 50);
-      }
-      selectedSearchIndex = -1;
-      renderSearchResults();
-    }
+    function closeSearch() { if (searchModal) searchModal.style.display = 'none'; }
+    function updateSearchStations(stations) { allForSearch = stations; }
 
     function renderSearchResults() {
-      if (!searchResults || !searchInput) return;
+      if (!searchResults) return;
       searchResults.innerHTML = '';
-      const query = searchInput.value.trim().toLowerCase();
-      for (let i = 0; i < filteredStationsForSearch.length; i++) {
-        const station = filteredStationsForSearch[i];
-        const item = document.createElement('div');
-        item.className = 'search-result-item';
-        item.dataset.index = i;
-        if (i === selectedSearchIndex) item.classList.add('selected');
-
-        const flag = getCountryFlagEmoji(station.countrycode || '');
-        const nameHtml = highlightMatch(station.name || 'Unknown', query);
-
-        const line1 = document.createElement('div');
-        line1.innerHTML = `${flag} ${nameHtml}`;
-        line1.style.fontWeight = '600';
-        item.appendChild(line1);
-
-        const line2 = document.createElement('div');
-        line2.style.fontSize = '0.85em';
-        line2.style.opacity = '0.7';
-        const tagsText = station.tags ? station.tags.split(',').slice(0, 3).join(', ') : '';
-        line2.textContent = [station.country, tagsText].filter(Boolean).join(' \u00B7 ');
-        item.appendChild(line2);
-
-        searchResults.appendChild(item);
-      }
-      if (filteredStationsForSearch.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'search-result-item';
-        empty.textContent = 'Nenhuma emissora encontrada';
-        empty.style.opacity = '0.5';
-        empty.style.cursor = 'default';
-        searchResults.appendChild(empty);
-      }
-    }
-
-    function onSearchResultClick(e) {
-      const item = e.target.closest('.search-result-item');
-      if (!item) return;
-      const index = parseInt(item.dataset.index, 10);
-      if (isNaN(index)) return;
-      selectSearchStation(index);
-    }
-
-    function onSearchKeydown(e) {
-      if (filteredStationsForSearch.length === 0) return;
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault();
-          navigateSearchSelection(1);
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          navigateSearchSelection(-1);
-          break;
-        case 'Enter':
-          e.preventDefault();
-          if (selectedSearchIndex >= 0) selectSearchStation(selectedSearchIndex);
-          else if (filteredStationsForSearch.length > 0) selectSearchStation(0);
-          break;
-        case 'Escape':
-          e.preventDefault();
-          closeSearch();
-          break;
-      }
-    }
-
-    function navigateSearchSelection(direction) {
-      if (filteredStationsForSearch.length === 0) return;
-      if (selectedSearchIndex === -1) {
-        selectedSearchIndex = direction > 0 ? 0 : filteredStationsForSearch.length - 1;
-      } else {
-        selectedSearchIndex += direction;
-      }
-      if (selectedSearchIndex < 0) selectedSearchIndex = filteredStationsForSearch.length - 1;
-      if (selectedSearchIndex >= filteredStationsForSearch.length) selectedSearchIndex = 0;
-      const items = searchResults.querySelectorAll('.search-result-item');
-      items.forEach((el, i) => {
-        el.classList.toggle('selected', i === selectedSearchIndex);
-        if (i === selectedSearchIndex) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      filteredSearch.forEach((s, i) => {
+        const div = document.createElement('div');
+        div.className = 'search-result-item';
+        div.dataset.index = i;
+        if (i === searchIdx) div.style.background = '#f5f5f5';
+        const flag = getFlagEmoji(s.countrycode);
+        div.innerHTML = `<span style="font-size:20px">${flag}</span><div><div style="font-weight:600">${escHtml(s.name || 'Unknown')}</div><div style="font-size:12px;color:#888">${s.country || ''} ${s.tags ? '· ' + s.tags.split(',').slice(0,3).join(', ') : ''}</div></div>`;
+        searchResults.appendChild(div);
       });
     }
 
-    function selectSearchStation(index) {
-      if (index < 0 || index >= filteredStationsForSearch.length) return;
-      if (onSearchSelectCallback) onSearchSelectCallback(filteredStationsForSearch[index]);
+    function selectSearch(i) {
+      if (i >= 0 && i < filteredSearch.length) onSearchSelect?.(filteredSearch[i]);
       closeSearch();
     }
 
-    function highlightMatch(text, query) {
-      if (!query) return escapeHtml(text);
-      const lower = text.toLowerCase();
-      const idx = lower.indexOf(query);
-      if (idx === -1) return escapeHtml(text);
-      const before = text.slice(0, idx);
-      const match = text.slice(idx, idx + query.length);
-      const after = text.slice(idx + query.length);
-      return `${escapeHtml(before)}<mark>${escapeHtml(match)}</mark>${highlightMatch(after, query)}`;
+    function getFlagEmoji(cc) {
+      if (!cc || cc.length !== 2) return '';
+      const c = cc.toUpperCase();
+      return String.fromCodePoint(c.charCodeAt(0) + 0x1F1A6, c.charCodeAt(1) + 0x1F1A6);
     }
 
-    function getCountryFlagEmoji(countryCode) {
-      if (!countryCode || countryCode.length !== 2) return '';
-      const code = countryCode.toUpperCase();
-      return String.fromCodePoint(code.charCodeAt(0) + 0x1F1A6, code.charCodeAt(1) + 0x1F1A6);
-    }
-
-    // =============================================================
-    // 7. FILTERS (filters.js)
-    // =============================================================
-    let filtersOnChangeCallback = null;
-    let activeCountries = new Set();
-    let activeTags = new Set();
-    let activeBitrates = new Set();
-    let filterSidebar = null;
-    let filterCountries = null;
-    let filterTags = null;
-    let filterBitrates = null;
+    // ============ FILTER UI ============
+    let filterOnChange, activeCountries = new Set(), activeTags = new Set(), activeBitrates = new Set();
+    let filterSidebar, filterCountries, filterTags, filterBitrates;
 
     function initFilters(stations, onChange) {
       filterSidebar = document.getElementById('filter-sidebar');
       filterCountries = document.getElementById('filter-countries');
       filterTags = document.getElementById('filter-tags');
       filterBitrates = document.getElementById('filter-bitrates');
-      if (!filterSidebar) {
-        console.warn('Filters: #filter-sidebar not found');
-        return;
-      }
-      filtersOnChangeCallback = onChange;
+      if (!filterSidebar) return;
+      filterOnChange = onChange;
       renderFilterOptions(stations);
-      if (filterCountries) filterCountries.addEventListener('change', onFilterCheckboxChange);
-      if (filterTags) filterTags.addEventListener('change', onFilterCheckboxChange);
-      if (filterBitrates) filterBitrates.addEventListener('change', onFilterCheckboxChange);
-      const closeBtn = filterSidebar.querySelector('.close-btn');
-      if (closeBtn) closeBtn.addEventListener('click', closeFilters);
-      document.addEventListener('click', (e) => {
-        if (filterSidebar.classList.contains('filter-sidebar--open')) {
-          if (!filterSidebar.contains(e.target) && !e.target.closest('[data-open-filters]')) {
-            closeFilters();
-          }
-        }
-      });
     }
 
-    function openFilters() {
-      if (filterSidebar) filterSidebar.classList.add('filter-sidebar--open');
-    }
-
-    function closeFilters() {
-      if (filterSidebar) filterSidebar.classList.remove('filter-sidebar--open');
-    }
+    function openFilters() { filterSidebar?.classList.add('filter-sidebar--open'); }
+    function closeFilters() { filterSidebar?.classList.remove('filter-sidebar--open'); }
 
     function getActiveFilters() {
       return {
@@ -1639,240 +1198,102 @@
       };
     }
 
-    function updateFilterOptions(stations) {
-      const prevCountries = new Set(activeCountries);
-      const prevTags = new Set(activeTags);
-      const prevBitrates = new Set(activeBitrates);
-      renderFilterOptions(stations);
-      restoreCheckboxState(filterCountries, prevCountries);
-      restoreCheckboxState(filterTags, prevTags);
-      restoreCheckboxState(filterBitrates, prevBitrates);
-      updateActiveSets();
-    }
-
     function renderFilterOptions(stations) {
-      const countryCounts = {};
-      const tagCounts = {};
-      const bitrateCounts = {};
-      for (const station of stations) {
-        const country = station.country || 'Unknown';
-        countryCounts[country] = (countryCounts[country] || 0) + 1;
-        if (station.tags) {
-          const tags = station.tags.split(',').map(t => t.trim()).filter(Boolean);
-          for (const tag of tags) {
-            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-          }
-        }
-        const bucket = getBitrateBucket(station.bitrate);
-        bitrateCounts[bucket] = (bitrateCounts[bucket] || 0) + 1;
+      const countryCounts = {}, tagCounts = {}, bitrateCounts = {'0-64 kbps':0,'64-128 kbps':0,'128-192 kbps':0,'192-320 kbps':0,'320+ kbps':0};
+      for (const s of stations) {
+        const c = s.country || 'Unknown';
+        countryCounts[c] = (countryCounts[c] || 0) + 1;
+        if (s.tags) s.tags.split(',').map(t => t.trim()).filter(Boolean).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+        const br = parseInt(s.bitrate, 10) || 0;
+        if (br <= 64) bitrateCounts['0-64 kbps']++;
+        else if (br <= 128) bitrateCounts['64-128 kbps']++;
+        else if (br <= 192) bitrateCounts['128-192 kbps']++;
+        else if (br <= 320) bitrateCounts['192-320 kbps']++;
+        else bitrateCounts['320+ kbps']++;
       }
-      if (filterCountries) renderCheckboxList(filterCountries, countryCounts, 'country', activeCountries, 30);
-      if (filterTags) renderCheckboxList(filterTags, tagCounts, 'tag', activeTags, 30);
-      if (filterBitrates) renderCheckboxList(filterBitrates, bitrateCounts, 'bitrate', activeBitrates, null, sortBitrateBuckets);
+      if (filterCountries) renderCheckboxes(filterCountries, countryCounts, 'country', activeCountries);
+      if (filterTags) renderCheckboxes(filterTags, tagCounts, 'tag', activeTags);
+      if (filterBitrates) renderCheckboxes(filterBitrates, bitrateCounts, 'bitrate', activeBitrates);
     }
 
-    function renderCheckboxList(container, counts, inputName, activeSet, limit = 30, sortFn) {
-      const entries = Object.entries(counts);
-      if (sortFn) entries.sort(sortFn);
-      else entries.sort((a, b) => b[1] - a[1]);
-      const topEntries = limit ? entries.slice(0, limit) : entries;
+    function renderCheckboxes(container, counts, name, activeSet) {
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 30);
       container.innerHTML = '';
-      const list = document.createElement('div');
-      list.className = 'filter-list';
-      for (const [label, count] of topEntries) {
+      entries.forEach(([label, count]) => {
         const item = document.createElement('label');
         item.className = 'filter-item';
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.value = label;
-        input.name = inputName;
-        if (activeSet.has(label)) input.checked = true;
-        const spanLabel = document.createElement('span');
-        spanLabel.textContent = label;
-        const spanCount = document.createElement('span');
-        spanCount.className = 'filter-count';
-        spanCount.textContent = `(${count})`;
-        item.appendChild(input);
-        item.appendChild(spanLabel);
-        item.appendChild(spanCount);
-        list.appendChild(item);
-      }
-      container.appendChild(list);
-    }
-
-    function onFilterCheckboxChange(e) {
-      const checkbox = e.target;
-      if (checkbox.tagName !== 'INPUT' || checkbox.type !== 'checkbox') return;
-      const value = checkbox.value;
-      const name = checkbox.name;
-      if (name === 'country') toggleSet(activeCountries, value, checkbox.checked);
-      else if (name === 'tag') toggleSet(activeTags, value, checkbox.checked);
-      else if (name === 'bitrate') toggleSet(activeBitrates, value, checkbox.checked);
-      if (filtersOnChangeCallback) filtersOnChangeCallback(getActiveFilters());
-    }
-
-    function toggleSet(set, value, isChecked) {
-      if (isChecked) set.add(value);
-      else set.delete(value);
-    }
-
-    function updateActiveSets() {
-      activeCountries = collectCheckedValues(filterCountries);
-      activeTags = collectCheckedValues(filterTags);
-      activeBitrates = collectCheckedValues(filterBitrates);
-    }
-
-    function collectCheckedValues(container) {
-      if (!container) return new Set();
-      const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
-      return new Set(Array.from(checkboxes).map(cb => cb.value));
-    }
-
-    function restoreCheckboxState(container, prevActive) {
-      if (!container) return;
-      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-      checkboxes.forEach(cb => {
-        if (prevActive.has(cb.value)) cb.checked = true;
+        item.innerHTML = `<input type="checkbox" value="${escHtml(label)}" name="${name}" ${activeSet.has(label)?'checked':''}> <span>${escHtml(label)}</span> <span class="filter-count">(${count})</span>`;
+        item.querySelector('input').addEventListener('change', e => {
+          if (e.target.checked) activeSet.add(label); else activeSet.delete(label);
+          filterOnChange?.(getActiveFilters());
+        });
+        container.appendChild(item);
       });
     }
 
-    function sortBitrateBuckets(a, b) {
-      const order = ['0-64 kbps', '64-128 kbps', '128-192 kbps', '192-320 kbps', '320+ kbps', 'Unknown'];
-      return order.indexOf(a[0]) - order.indexOf(b[0]);
-    }
+    // ============ MAIN ============
+    let allStations = [], currentStations = [], favoritesOnly = false, activeStationUuid = null, sleepTimerId = null;
 
-    function getBitrateBucket(bitrate) {
-      const b = Number(bitrate) || 0;
-      if (b === 0) return 'Unknown';
-      if (b <= 64) return '0-64 kbps';
-      if (b <= 128) return '64-128 kbps';
-      if (b <= 192) return '128-192 kbps';
-      if (b <= 320) return '192-320 kbps';
-      return '320+ kbps';
-    }
-
-    // =============================================================
-    // 8. MAIN (main.js) – lógica principal
-    // =============================================================
-    // DOM refs
-    const gridEl = document.getElementById('station-grid');
-    const emptyStateEl = document.getElementById('empty-state');
-    const gridTitleEl = document.getElementById('grid-title');
-    const gridCountEl = document.getElementById('grid-count');
-    const playerStationEl = document.getElementById('player-station');
-    const playerMetaEl = document.getElementById('player-meta');
-    const btnPlay = document.getElementById('btn-play');
-    const btnPrev = document.getElementById('btn-prev');
-    const btnNext = document.getElementById('btn-next');
-    const btnFavorite = document.getElementById('btn-favorite');
-    const btnSleep = document.getElementById('btn-sleep');
-    const sleepMenu = document.getElementById('sleep-menu');
-    const volumeSlider = document.getElementById('volume');
-    const favoritesToggle = document.getElementById('favorites-toggle');
-    const filtersToggleBtn = document.getElementById('filters-toggle');
-    const closeFiltersBtn = document.getElementById('close-filters');
-    const clearFiltersBtn = document.getElementById('clear-filters');
-
-    let allStations = [];
-    let currentStations = [];
-    let favoritesOnly = false;
-    let activeStationUuid = null;
-    let sleepTimerId = null;
-
-    // Country code -> flag
-    function countryCodeToFlag(code) {
-      if (!code || code.length !== 2) return '';
-      const cc = code.toUpperCase();
-      return String.fromCodePoint(0x1F1E6 + cc.charCodeAt(0) - 65) +
-             String.fromCodePoint(0x1F1E6 + cc.charCodeAt(1) - 65);
-    }
-
-    // Render grid
     function renderGrid(stations) {
+      const gridEl = document.getElementById('station-grid');
+      const emptyEl = document.getElementById('empty-state');
+      const countEl = document.getElementById('grid-count');
       if (!gridEl) return;
       gridEl.innerHTML = '';
-      if (stations.length === 0) {
+      if (!stations.length) {
         gridEl.style.display = 'none';
-        if (emptyStateEl) emptyStateEl.style.display = 'flex';
-        if (gridCountEl) gridCountEl.textContent = '0 emissoras';
+        if (emptyEl) emptyEl.style.display = 'flex';
+        if (countEl) countEl.textContent = '0 emissoras';
         return;
       }
       gridEl.style.display = 'grid';
-      if (emptyStateEl) emptyStateEl.style.display = 'none';
-      if (gridCountEl) gridCountEl.textContent = `${stations.length} emissora${stations.length !== 1 ? 's' : ''}`;
-
-      for (const station of stations) {
+      if (emptyEl) emptyEl.style.display = 'none';
+      if (countEl) countEl.textContent = `${stations.length} emissora${stations.length !== 1 ? 's' : ''}`;
+      
+      for (const s of stations) {
         const card = document.createElement('div');
         card.className = 'station-card';
-        if (station.stationuuid === activeStationUuid) card.classList.add('station-card--active');
-        card.dataset.uuid = station.stationuuid;
-        const flag = countryCodeToFlag(station.countrycode);
-        const tags = station.tags ? station.tags.split(',').map(t => t.trim()).filter(Boolean).slice(0, 3) : [];
-        card.innerHTML = `
-          <span class="station-card__flag">${flag}</span>
-          <span class="station-card__name">${escapeHtml(station.name)}</span>
-          <div class="station-card__tags">${tags.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}</div>
-          <button class="station-card__play" title="Play">&#9654;</button>
-        `;
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('.station-card__play')) e.stopPropagation();
-          onStationClick(station);
-        });
+        if (s.stationuuid === activeStationUuid) card.classList.add('station-card--active');
+        card.dataset.uuid = s.stationuuid;
+        const flag = getFlagEmoji(s.countrycode);
+        const tags = (s.tags || '').split(',').map(t => t.trim()).filter(Boolean).slice(0, 3);
+        card.innerHTML = `<span class="station-card__flag">${flag}</span><span class="station-card__name">${escHtml(s.name)}</span><div class="station-card__tags">${tags.map(t => `<span class="tag-pill">${escHtml(t)}</span>`).join('')}</div><button class="station-card__play" title="Play">&#9654;</button>`;
+        card.addEventListener('click', e => { if (!e.target.closest('.station-card__play')) onStationClick(s); });
         gridEl.appendChild(card);
       }
     }
 
     function highlightCard(uuid) {
       activeStationUuid = uuid;
-      if (!gridEl) return;
-      const cards = gridEl.querySelectorAll('.station-card');
-      cards.forEach(card => {
-        card.classList.toggle('station-card--active', card.dataset.uuid === uuid);
-      });
+      document.querySelectorAll('.station-card').forEach(c => c.classList.toggle('station-card--active', c.dataset.uuid === uuid));
     }
 
-    function updatePlayerBar(station) {
-      if (!station) return;
-      if (playerStationEl) playerStationEl.textContent = station.name || 'Unknown Station';
-      if (playerMetaEl) {
-        const parts = [];
-        if (station.country) parts.push(station.country);
-        if (station.bitrate) parts.push(`${station.bitrate} kbps`);
-        if (station.codec && station.codec !== 'UNKNOWN') parts.push(station.codec);
-        playerMetaEl.textContent = parts.join(' · ');
-      }
-      updateFavoriteBtnState();
+    function updatePlayerBar(s) {
+      if (!s) return;
+      document.getElementById('player-station').textContent = s.name || 'Unknown';
+      const parts = [];
+      if (s.country) parts.push(s.country);
+      if (s.bitrate) parts.push(`${s.bitrate} kbps`);
+      if (s.codec && s.codec !== 'UNKNOWN') parts.push(s.codec);
+      document.getElementById('player-meta').textContent = parts.join(' · ');
+      updateFavBtn();
     }
 
-    function updatePlayBtnState() {
-      if (!btnPlay) return;
-      btnPlay.innerHTML = isPlayingNow() ? '&#9208;' : '&#9654;';
+    function updatePlayBtn() { document.getElementById('btn-play').innerHTML = isPlayingNow() ? '&#9208;' : '&#9654;'; }
+    function updateFavBtn() {
+      const btn = document.getElementById('btn-favorite');
+      const s = getCurrentStation();
+      btn.classList.toggle('player-btn--active', s && isFavorite(s.stationuuid));
     }
 
-    function updateFavoriteBtnState() {
-      if (!btnFavorite) return;
-      const station = getCurrentStation();
-      if (!station) {
-        btnFavorite.classList.remove('player-btn--active');
-        return;
-      }
-      if (isFavorite(station.stationuuid)) btnFavorite.classList.add('player-btn--active');
-      else btnFavorite.classList.remove('player-btn--active');
-    }
-
-    function updateFavoritesCount() {
-      const countEl = document.querySelector('.favorites-count');
-      if (countEl) countEl.textContent = getFavorites().size;
-    }
-
-    function onStationClick(station) {
-      if (!station) return;
-      playStation(station);
-      setLastPlayed(station);
-      updatePlayerBar(station);
-      updatePlayBtnState();
-      highlightCard(station.stationuuid);
-      highlightMapMarker(station.stationuuid);
+    function onStationClick(s) {
+      if (!s) return;
+      playStation(s);
+      setLastPlayed(s);
+      updatePlayerBar(s);
+      updatePlayBtn();
+      highlightCard(s.stationuuid);
+      highlightMapMarker(s.stationuuid);
     }
 
     function onFiltersChange() {
@@ -1883,222 +1304,116 @@
       renderGrid(currentStations);
       updateMapMarkers(currentStations);
       updateSearchStations(currentStations);
-      if (gridTitleEl) {
-        if (favoritesOnly) gridTitleEl.textContent = 'Favoritos';
-        else if (filters.countries.length || filters.tags.length || filters.bitrates.length) gridTitleEl.textContent = 'Filtrados';
-        else gridTitleEl.textContent = 'Todas as emissoras';
-      }
-    }
-
-    function showLoadingState() {
-      if (!gridEl) return;
-      gridEl.style.display = 'none';
-      if (emptyStateEl) {
-        emptyStateEl.style.display = 'flex';
-        emptyStateEl.innerHTML = `
-          <div class="loading-spinner"></div>
-          <p>Carregando emissoras...</p>
-        `;
-      }
-      if (gridCountEl) gridCountEl.textContent = '';
-    }
-
-    function showErrorState() {
-      if (!gridEl) return;
-      gridEl.style.display = 'none';
-      if (emptyStateEl) {
-        emptyStateEl.style.display = 'flex';
-        emptyStateEl.innerHTML = `
-          <p>Falha ao carregar emissoras.</p>
-          <button class="retry-btn" id="retry-load">Tentar novamente</button>
-        `;
-        const retryBtn = document.getElementById('retry-load');
-        if (retryBtn) retryBtn.addEventListener('click', loadStations, { once: true });
-      }
-      if (gridCountEl) gridCountEl.textContent = '';
     }
 
     async function loadStations() {
-      showLoadingState();
+      document.getElementById('station-grid').style.display = 'none';
+      document.getElementById('empty-state').style.display = 'flex';
+      document.getElementById('empty-state').innerHTML = '<div class="loading-spinner"></div><p>Carregando emissoras...</p>';
+      
       try {
-        const stations = await fetchStations();
-        allStations = stations;
-        currentStations = stations;
-        renderGrid(stations);
-        initMap('map', stations, onStationClick);
-        initSearch(stations, onStationClick);
-        initFilters(stations, onFiltersChange);
-        updateFilterOptions(stations);
-        const lastPlayed = getLastPlayed();
-        if (lastPlayed) updatePlayerBar(lastPlayed);
-        showToast(`${stations.length} emissoras carregadas`);
+        const result = await fetchStations();
+        allStations = result.stations;
+        currentStations = allStations;
+        renderGrid(allStations);
+        initMap('map', allStations, onStationClick);
+        initSearch(allStations, onStationClick);
+        initFilters(allStations, onFiltersChange);
+        
+        const last = getLastPlayed();
+        if (last) updatePlayerBar(last);
+        
+        showToast(`${allStations.length} emissoras (${result.globalCount} globais + ${result.brCount} brasileiras)`, 'success');
       } catch (err) {
-        console.error('Failed to load stations:', err);
+        console.error('Erro:', err);
+        document.getElementById('empty-state').innerHTML = `<p>Falha ao carregar.</p><button class="retry-btn" onclick="location.reload()">Tentar novamente</button>`;
         showToast('Falha ao carregar emissoras', 'error');
-        showErrorState();
       }
     }
 
-    function setupPlayerEvents() {
-      if (btnPlay) {
-        btnPlay.addEventListener('click', () => {
-          togglePlay();
-          updatePlayBtnState();
-        });
-      }
-      if (btnPrev) {
-        btnPrev.addEventListener('click', () => {
-          playPrev(currentStations);
-          const station = getCurrentStation();
-          if (station) {
-            setLastPlayed(station);
-            updatePlayerBar(station);
-            highlightCard(station.stationuuid);
-            highlightMapMarker(station.stationuuid);
-          }
-        });
-      }
-      if (btnNext) {
-        btnNext.addEventListener('click', () => {
-          playNext(currentStations);
-          const station = getCurrentStation();
-          if (station) {
-            setLastPlayed(station);
-            updatePlayerBar(station);
-            highlightCard(station.stationuuid);
-            highlightMapMarker(station.stationuuid);
-          }
-        });
-      }
-      if (volumeSlider) {
-        volumeSlider.addEventListener('input', (e) => setVolume(e.target.value));
-        setVolume(volumeSlider.value);
-      }
-      if (btnFavorite) {
-        btnFavorite.addEventListener('click', () => {
-          const station = getCurrentStation();
-          if (!station) return;
-          const isFav = toggleFavorite(station.stationuuid);
-          updateFavoriteBtnState();
-          updateFavoritesCount();
-          showToast(isFav ? 'Adicionado aos favoritos' : 'Removido dos favoritos');
-          if (favoritesOnly) onFiltersChange();
-        });
-      }
-      if (btnSleep && sleepMenu) {
-        btnSleep.addEventListener('click', (e) => {
-          e.stopPropagation();
-          sleepMenu.classList.toggle('sleep-menu--open');
-        });
-        document.addEventListener('click', (e) => {
-          if (!e.target.closest('.sleep-dropdown') && sleepMenu.classList.contains('sleep-menu--open')) {
-            sleepMenu.classList.remove('sleep-menu--open');
-          }
-        });
-        sleepMenu.querySelectorAll('button[data-min]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const mins = parseInt(btn.dataset.min, 10);
-            if (sleepTimerId) { clearTimeout(sleepTimerId); sleepTimerId = null; }
-            if (mins > 0) {
-              sleepTimerId = setTimeout(() => {
-                pause();
-                updatePlayBtnState();
-                showToast(`Timer de sono — pausado`);
-                sleepTimerId = null;
-              }, mins * 60000);
-              showToast(`Timer definido para ${mins} min`);
-            } else {
-              showToast('Timer desligado');
-            }
-            sleepMenu.classList.remove('sleep-menu--open');
-          });
-        });
-      }
-    }
-
-    function setupHeaderEvents() {
-      if (favoritesToggle) {
-        favoritesToggle.addEventListener('click', () => {
-          favoritesOnly = !favoritesOnly;
-          favoritesToggle.classList.toggle('header-btn--active', favoritesOnly);
-          onFiltersChange();
-        });
-      }
-      if (filtersToggleBtn) {
-        filtersToggleBtn.addEventListener('click', () => openFilters());
-      }
-      if (closeFiltersBtn) {
-        closeFiltersBtn.addEventListener('click', () => closeFilters());
-      }
-      if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', () => {
-          favoritesOnly = false;
-          if (favoritesToggle) favoritesToggle.classList.remove('header-btn--active');
-          onFiltersChange();
-        });
-      }
-    }
-
-    function setupKeyboard() {
-      document.addEventListener('keydown', (e) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-          e.preventDefault();
-          openSearch();
-          return;
-        }
-        if (e.key === 'Escape') {
-          closeSearch();
-          closeFilters();
-          return;
-        }
+    function setupEvents() {
+      document.getElementById('btn-play').addEventListener('click', () => { togglePlay(); updatePlayBtn(); });
+      document.getElementById('btn-prev').addEventListener('click', () => {
+        playPrev(currentStations);
+        const s = getCurrentStation();
+        if (s) { updatePlayerBar(s); highlightCard(s.stationuuid); highlightMapMarker(s.stationuuid); }
       });
-    }
-
-    function setupAudioErrorHandling() {
+      document.getElementById('btn-next').addEventListener('click', () => {
+        playNext(currentStations);
+        const s = getCurrentStation();
+        if (s) { updatePlayerBar(s); highlightCard(s.stationuuid); highlightMapMarker(s.stationuuid); }
+      });
+      document.getElementById('volume').addEventListener('input', e => setVolume(e.target.value));
+      setVolume(0.8);
+      
+      document.getElementById('btn-favorite').addEventListener('click', () => {
+        const s = getCurrentStation();
+        if (!s) return;
+        const isFav = toggleFavorite(s.stationuuid);
+        updateFavBtn();
+        document.querySelector('.favorites-count').textContent = getFavorites().size;
+        showToast(isFav ? 'Adicionado aos favoritos' : 'Removido dos favoritos');
+        if (favoritesOnly) onFiltersChange();
+      });
+      
+      document.getElementById('favorites-toggle').addEventListener('click', function() {
+        favoritesOnly = !favoritesOnly;
+        this.classList.toggle('header-btn--active', favoritesOnly);
+        onFiltersChange();
+      });
+      
+      document.getElementById('filters-toggle').addEventListener('click', openFilters);
+      document.getElementById('close-filters').addEventListener('click', closeFilters);
+      document.getElementById('clear-filters').addEventListener('click', () => {
+        activeCountries.clear(); activeTags.clear(); activeBitrates.clear();
+        favoritesOnly = false;
+        document.getElementById('favorites-toggle').classList.remove('header-btn--active');
+        onFiltersChange();
+        closeFilters();
+      });
+      
+      // Sleep
+      document.getElementById('btn-sleep').addEventListener('click', e => {
+        e.stopPropagation();
+        document.getElementById('sleep-menu').classList.toggle('sleep-menu--open');
+      });
+      document.querySelectorAll('#sleep-menu button[data-min]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mins = parseInt(btn.dataset.min);
+          if (sleepTimerId) { clearTimeout(sleepTimerId); sleepTimerId = null; }
+          if (mins > 0) {
+            sleepTimerId = setTimeout(() => { pause(); updatePlayBtn(); showToast('Timer de sono — pausado'); }, mins * 60000);
+            showToast(`Timer: ${mins} min`);
+          } else showToast('Timer desligado');
+          document.getElementById('sleep-menu').classList.remove('sleep-menu--open');
+        });
+      });
+      
+      // Keyboard
+      document.addEventListener('keydown', e => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+        if (e.key === 'Escape') { closeSearch(); closeFilters(); }
+      });
+      
+      // Player errors
       initPlayer(
         () => {
           showToast('Emissora indisponível', 'error');
-          updatePlayBtnState();
+          updatePlayBtn();
           setTimeout(() => {
             playNext(currentStations);
-            const station = getCurrentStation();
-            if (station) {
-              setLastPlayed(station);
-              updatePlayerBar(station);
-              highlightCard(station.stationuuid);
-              highlightMapMarker(station.stationuuid);
-              updatePlayBtnState();
-            }
+            const s = getCurrentStation();
+            if (s) { updatePlayerBar(s); highlightCard(s.stationuuid); highlightMapMarker(s.stationuuid); updatePlayBtn(); }
           }, 1500);
         },
-        () => { updatePlayBtnState(); }
+        () => updatePlayBtn()
       );
     }
 
-    function setupSearchModal() {
-      const modal = document.getElementById('search-modal');
-      if (!modal) return;
-      const backdrop = modal.querySelector('.search-backdrop');
-      if (backdrop) backdrop.addEventListener('click', () => closeSearch());
-    }
-
-    function startup() {
-      updateFavoritesCount();
-      setupPlayerEvents();
-      setupHeaderEvents();
-      setupKeyboard();
-      setupAudioErrorHandling();
-      setupSearchModal();
-      loadStations();
-    }
-
     // Start
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', startup);
-    } else {
-      startup();
-    }
-
+    document.querySelector('.favorites-count').textContent = getFavorites().size;
+    setupEvents();
+    loadStations();
   </script>
 </body>
 </html>
