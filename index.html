@@ -891,7 +891,7 @@
       try { localStorage.setItem(LAST_KEY, JSON.stringify(station)); } catch {}
     }
 
-    // ============ API - CARREGA MAIS RÁDIOS BRASILEIRAS ============
+    // ============ API - COM RÁDIOS MANUAIS ============
     async function fetchStations() {
       const headers = { 'User-Agent': 'RadioGlobal/1.0' };
       
@@ -902,11 +902,10 @@
       const globalData = await globalResp.json();
       console.log(`✅ Globais: ${globalData.length}`);
       
-      // 2. Brasileiras - busca por páginas para pegar MUITAS
+      // 2. Brasileiras
       console.log('🔄 Carregando rádios brasileiras...');
       let todasBR = [];
       
-      // Busca por nome (as mais populares primeiro)
       try {
         const resp = await fetch('https://de1.api.radio-browser.info/json/stations/bycountry/brazil?hidebroken=true&limit=500', { headers });
         if (resp.ok) {
@@ -918,8 +917,8 @@
         }
       } catch(e) { console.warn('Erro bycountry:', e); }
       
-      // Busca adicional por estados brasileiros para pegar mais
-      const estados = ['sao-paulo', 'rio-de-janeiro', 'minas-gerais', 'bahia', 'parana', 'rio-grande-do-sul', 'pernambuco', 'ceara', 'para', 'santa-catarina', 'goias', 'maranhao', 'amazonas', 'paraiba', 'espirito-santo', 'rio-grande-do-norte', 'alagoas', 'piaui', 'distrito-federal', 'mato-grosso', 'mato-grosso-do-sul', 'sergipe', 'rondonia', 'tocantins', 'acre', 'amapa', 'roraima'];
+      // Busca por estados
+      const estados = ['bahia', 'sao-paulo', 'rio-de-janeiro', 'minas-gerais', 'parana', 'rio-grande-do-sul', 'pernambuco', 'ceara', 'para', 'santa-catarina', 'goias', 'maranhao', 'amazonas', 'paraiba', 'espirito-santo', 'rio-grande-do-norte', 'alagoas', 'piaui', 'distrito-federal', 'mato-grosso', 'mato-grosso-do-sul', 'sergipe', 'rondonia', 'tocantins', 'acre', 'amapa', 'roraima'];
       
       for (const estado of estados) {
         try {
@@ -931,9 +930,31 @@
               console.log(`✅ ${estado}: ${data.length}`);
             }
           }
-          await new Promise(r => setTimeout(r, 100)); // Respeitar rate limit
+          await new Promise(r => setTimeout(r, 100));
         } catch(e) {}
       }
+
+      // ============ RÁDIOS ADICIONADAS MANUALMENTE ============
+      const radiosManuais = [
+        {
+          stationuuid: "uesb-975-fm",
+          name: "Rádio UESB 97.5 FM - Vitória da Conquista/BA",
+          url_resolved: "http://200.128.60.2:8000/stream",
+          country: "Brazil",
+          countrycode: "BR",
+          state: "Bahia",
+          language: "portuguese",
+          tags: "universitaria,universidade,educativa,uesb,bahia,vitoria da conquista",
+          geo_lat: -14.865,
+          geo_long: -40.8376,
+          bitrate: 128,
+          codec: "MP3",
+          homepage: "http://www.uesb.br/radio"
+        }
+      ];
+      
+      todasBR = [...todasBR, ...radiosManuais];
+      console.log(`✅ Rádios manuais adicionadas: ${radiosManuais.length}`);
       
       console.log(`✅ Total BR antes de deduplicar: ${todasBR.length}`);
       
@@ -948,7 +969,7 @@
       }
       console.log(`✅ Brasileiras únicas: ${brUnicas.length}`);
       
-      // 3. Junta globais + brasileiras (remove duplicatas)
+      // Junta globais + brasileiras
       const todas = [...globalData, ...brUnicas];
       const todasUnicas = [];
       const todasVistas = new Set();
@@ -959,7 +980,7 @@
         }
       }
       
-      // 4. Filtro técnico
+      // Filtro técnico
       const filtradas = todasUnicas.filter(s => {
         const url = s.url_resolved || '';
         return (url.startsWith('http://') || url.startsWith('https://')) &&
@@ -1033,7 +1054,7 @@
         const marker = L.circleMarker([lat, lng], {
           radius: 6, color: '#111', weight: 1.5, fillColor: '#111', fillOpacity: 0.7
         });
-        marker.bindPopup(`<strong>${escHtml(s.name)}</strong><br>${escHtml(s.country || '')}`);
+        marker.bindPopup(`<strong>${escHtml(s.name)}</strong><br>${escHtml(s.country || '')}${s.state ? ' - ' + s.state : ''}`);
         marker.on('click', () => onStationClickCb?.(s));
         markerClusterGroup.addLayer(marker);
         markersMap.set(s.stationuuid, marker);
@@ -1272,6 +1293,7 @@
       if (!s) return;
       document.getElementById('player-station').textContent = s.name || 'Unknown';
       const parts = [];
+      if (s.state) parts.push(s.state);
       if (s.country) parts.push(s.country);
       if (s.bitrate) parts.push(`${s.bitrate} kbps`);
       if (s.codec && s.codec !== 'UNKNOWN') parts.push(s.codec);
@@ -1323,7 +1345,7 @@
         const last = getLastPlayed();
         if (last) updatePlayerBar(last);
         
-        showToast(`${allStations.length} emissoras (${result.globalCount} globais + ${result.brCount} brasileiras)`, 'success');
+        showToast(`${allStations.length} emissoras (${result.globalCount} globais + ${result.brCount} BR)`, 'success');
       } catch (err) {
         console.error('Erro:', err);
         document.getElementById('empty-state').innerHTML = `<p>Falha ao carregar.</p><button class="retry-btn" onclick="location.reload()">Tentar novamente</button>`;
